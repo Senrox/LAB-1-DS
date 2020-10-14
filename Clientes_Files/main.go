@@ -57,7 +57,7 @@ func store(dict map[string]*Items, item Items) {
 //lee pymes.csv y entrega un hashmap con los productos de pymes con prioridad 0 o 1
 func priorityOrders() map[string]*Items {
 	// path to csv
-	fp, err := os.Open("../csv_Files/pymes.csv")
+	fp, err := os.Open("csv_Files/pymes.csv")
 	if err != nil {
 		log.Fatalln("Can't open file: ", err)
 	}
@@ -86,7 +86,7 @@ func priorityOrders() map[string]*Items {
 //lee retail.csv y entrega un hashmap con los productos de retail 2
 func retailOrders(dict map[string]*Items) {
 	// path to csv
-	fp, err := os.Open("../csv_Files/retail.csv")
+	fp, err := os.Open("csv_Files/retail.csv")
 	if err != nil {
 		log.Fatalln("Can't open file: ", err)
 	}
