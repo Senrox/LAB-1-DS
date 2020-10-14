@@ -35,7 +35,8 @@ import (
 )
 
 const (
-	address     = "localhost:50051"
+	//address     = ":50051"
+	address     = "10.6.40.169:50051"
 	defaultName = "Bro"
 	clientName  = "CLIENTES"
 )
@@ -56,7 +57,7 @@ func store(dict map[string]*Items, item Items) {
 //lee pymes.csv y entrega un hashmap con los productos de pymes con prioridad 0 o 1
 func priorityOrders() map[string]*Items {
 	// path to csv
-	fp, err := os.Open("C:\\Users\\marth\\OneDrive\\Desktop\\2020-2\\Distribuidos\\Lab 1\\Lab1_arch_ej\\pymes.csv")
+	fp, err := os.Open("../csv_files/pymes.csv")
 	if err != nil {
 		log.Fatalln("Can't open file: ", err)
 	}
@@ -85,7 +86,7 @@ func priorityOrders() map[string]*Items {
 //lee retail.csv y entrega un hashmap con los productos de retail 2
 func retailOrders(dict map[string]*Items) {
 	// path to csv
-	fp, err := os.Open("C:\\Users\\marth\\OneDrive\\Desktop\\2020-2\\Distribuidos\\Lab 1\\Lab1_arch_ej\\retail.csv")
+	fp, err := os.Open("../csv_files/retail.csv")
 	if err != nil {
 		log.Fatalln("Can't open file: ", err)
 	}
