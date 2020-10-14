@@ -128,8 +128,6 @@ func main() {
 	itemsPriority := priorityOrders()
 	retailOrders(itemsPriority)
 
-	fmt.Println("yes")
-
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -137,6 +135,8 @@ func main() {
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
+
+	fmt.Println("yes")
 
 	// Contact the server and print out its response.
 
