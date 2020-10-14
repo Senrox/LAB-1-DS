@@ -32,7 +32,8 @@ import (
 )
 
 const (
-	address     = "localhost:50051"
+	//address     = ":50051"
+	address     = "10.6.40.169:50051"
 	defaultName = "Bro"
 	clientName  = "CAMIONES"
 )

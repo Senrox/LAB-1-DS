@@ -35,7 +35,6 @@ import (
 
 const (
 	port       = ":50051"
-	layoutDate = "2020-10-12 00:00:00"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -74,7 +73,6 @@ var trackingCode int = 1000
 
 // SayHello implements helloworld.GreeterServer
 func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderConfirmation, error) {
-	//log.Printf("Received: %v. From: %v", in.GetName(), in.GetClientName())
 
 	fmt.Println("\n<--------------- NEW ORDER COMES IN!!! --------------->")
 	log.Printf("ORDER INFORMATON:")
