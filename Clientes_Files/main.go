@@ -128,6 +128,8 @@ func main() {
 	itemsPriority := priorityOrders()
 	retailOrders(itemsPriority)
 
+	fmt.Println("yes")
+
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
