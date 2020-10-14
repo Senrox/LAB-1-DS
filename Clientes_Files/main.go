@@ -36,7 +36,7 @@ import (
 
 const (
 	//address     = ":50051"
-	address     = "10.6.40.169:50051"
+	address     = "dist29:50051"
 	defaultName = "Bro"
 	clientName  = "CLIENTES"
 )
