@@ -73,16 +73,28 @@ func realizarEnvio(c pb.GreeterClient, tipo string) {
 	// esto dentro del codigo de camiones
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	r, err := c.TrakingRequest(ctx, orden)
+	
+	r, err := c.SendInformation(ctx, orden)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 
 	if tipo == "retail" {
-
+		reintento = 3
 	} else if tipo == "pyme" {
-
+		reintento = 2
 	}
+
+	for i := 0; i < reintento; i++{
+		//hace cosas
+
+		try = Envio()
+
+		if try {
+			//intento = 1
+			break
+		}
+	} 
 
 }
 
