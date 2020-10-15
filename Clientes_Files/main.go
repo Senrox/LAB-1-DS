@@ -100,7 +100,7 @@ func retailOrders() *list.List {
 			log.Fatalln("error reading file: ", err)
 		}
 
-		producto := Items{id: record[0], name: record[1], prioridad: record[5], data: []string{record[2], record[3], record[4]}}
+		producto := Items{id: record[0], name: record[1], prioridad: "2", data: []string{record[2], record[3], record[4]}}
 
 		itemsRetail.PushBack(producto)
 
