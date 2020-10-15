@@ -132,50 +132,54 @@ func getInput(x int) string {
 *  p es la lista de la cual hacer el pedido
 *  c es la conexion
  */
-func hacerOrden(p *list.List, c pb.GreeterClient) {
+func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
+	for {
+		if p != nil {
+			// waiting time
+			time.Sleep(time.Duration(waitingTime) * time.Second)
 
-	if p != nil {
+			front := p.Front()
+			itemI := Items(front.Value.(Items))
 
-		front := p.Front()
-		itemI := Items(front.Value.(Items))
+			tipo := "none"
 
-		tipo := "none"
+			if itemI.prioridad == "0" {
+				tipo = "Normal"
+			} else if itemI.prioridad == "1" {
+				tipo = "prioritario"
+			} else {
+				tipo = "retail"
+			}
 
-		if itemI.prioridad == "0" {
-			tipo = "Normal"
-		} else if itemI.prioridad == "1" {
-			tipo = "prioritario"
+			// generacion de orden
+			orden := &pb.OrderRequest{
+				OrderID:      itemI.id,
+				ProductName:  itemI.name,
+				ProductValue: itemI.data[0],
+				Src:          itemI.data[1],
+				Dest:         itemI.data[2],
+				Priority:     itemI.prioridad,
+				ProductType:  tipo,
+			}
+
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			// Hacer una consulta
+			r, err := c.MakeOrder(ctx, orden)
+			if err != nil {
+				log.Fatalf("could not greet: %v", err)
+			}
+
+			// mostrar codigo seguimiento por pantalla
+			fmt.Print("\n<--------------- INFORMATION --------------->\n")
+			log.Printf("Order Tracking Code: %s\n", r.GetMessage())
+			fmt.Println("\n<--------------- INFORMATION --------------->")
+
+			p.Remove(front)
+
 		} else {
-			tipo = "retail"
+			fmt.Println("No hay mas ordenes que enviar.")
 		}
-
-		// generacion de orden
-		orden := &pb.OrderRequest{
-			OrderID:      itemI.id,
-			ProductName:  itemI.name,
-			ProductValue: itemI.data[0],
-			Src:          itemI.data[1],
-			Dest:         itemI.data[2],
-			Priority:     itemI.prioridad,
-			ProductType:  tipo,
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		// Hacer una consulta
-		r, err := c.MakeOrder(ctx, orden)
-		if err != nil {
-			log.Fatalf("could not greet: %v", err)
-		}
-
-		// mostrar codigo seguimiento por pantalla
-		fmt.Print("\n<--------------- INFORMATION --------------->\n")
-		log.Printf("Order Tracking Code: %s\n", r.GetMessage())
-		fmt.Println("\n<--------------- INFORMATION --------------->")
-
-		p.Remove(front)
-	} else {
-		fmt.Println("No hay mas ordenes que enviar.")
 	}
 }
 
@@ -212,14 +216,14 @@ func main() {
 	//Thread hacer ordenes
 	//soy Pyme
 	if opcion == "1" {
-		go hacerOrden(pymes, c)
+		go hacerOrden(pymes, c, waitingTime)
 	} else { //Soy Retail
-		go hacerOrden(retails, c)
+		go hacerOrden(retails, c, waitingTime)
 	}
 
 	// Codigo para realizer seguimiento
 
-	time.Sleep((5 * time.Second))
+	time.Sleep(5 * time.Second)
 
 	for {
 		//Ingresar Codigo de Seguimiento
