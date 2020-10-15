@@ -76,7 +76,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 
 var trackingCode int = 1000
 
-// Server recibe orden y se evnia codigo de seguimiente
+// Server recibe orden y se evnia codigo de seguimiento
 func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderConfirmation, error) {
 
 	fmt.Println("\n<--------------- NEW ORDER COMES IN!!! --------------->")
@@ -116,24 +116,25 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 
 //consulta de seguimiento a camiones
 /*
-func (s *server) TrackingStatus(ctx context.Context, in *pb.StatusRequest) (*pb.StatusResponse, error) {
-	fmt.Println("\n<--------------- STATUS REQUEST --------------->")
+func (s *server) sendInformation(ctx context.Context, in *pb.Information) (*pb.HelloReply, error) {
+	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 	fmt.Println()
-	log.Printf("STATUS INFORMATON: %s\n", in.GetTrackingCode())
 
-	var camionesResponse string = ""
-	camionesResponse = &pb.StatusRequest{Message: ProductStatus[in.GetStatus()].status}, nil
-
-	estado := Items{
-		trackingCode: in.GetTrackingCode(),
-		status:       camionesResponse,
+	data := &pb.Information{
+		OrderID:      itemI.id,
+		ProductType:  itemI.name,
+		ProductValue: itemI.data[0],
+		Src:          itemI.data[1],
+		Dest:         itemI.data[2],
+		Attemps:      itemI.prioridad,
+		Date:         tipo,
 	}
 
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = "New Status" // get status
 
 	store(estado)
 
-	//return &pb.HelloReply{Message: "Sup " + in.GetName()}, nil
+	return &pb.HelloReply{Message: "Status" + in.GetName()}, nil
 }
 */
 
@@ -152,8 +153,10 @@ func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb
 
 }
 
-// database
+// ProductDatabaseByTracking - base de datos de tracking
 var ProductDatabaseByTracking map[string]*Items
+
+// ProductStatus status de los productos
 var ProductStatus map[string]*ItemStatus
 
 //funcion que almacena datos en un hashmap

@@ -24,7 +24,8 @@ import (
 	"fmt"
 	pb "helloworld"
 	"log"
-	"os"
+	"math/rand"
+	"strconv"
 	"time"
 
 	"google.golang.org/grpc"
@@ -55,9 +56,34 @@ type Items struct {
 	date  string
 }
 
-//funcion que almacena datos en un hashmap
-func store(dict map[string]*Items, item Items) {
-	dict[item.id] = &item
+// Envio retorna si el envio se hace o no se hace
+func Envio() bool {
+	in := []int{0, 1, 1, 1, 1}
+	randomIndex := rand.Intn(len(in))
+	pick := in[randomIndex]
+
+	if pick == 1 {
+		return true
+	}
+	return false
+}
+
+func realizarEnvio(c pb.GreeterClient, tipo string) {
+
+	// esto dentro del codigo de camiones
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	r, err := c.TrakingRequest(ctx, orden)
+	if err != nil {
+		log.Fatalf("could not greet: %v", err)
+	}
+
+	if tipo == "retail" {
+
+	} else if tipo == "pyme" {
+
+	}
+
 }
 
 func main() {
@@ -69,25 +95,19 @@ func main() {
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
 
+	//waiting Time
+	fmt.Println("\nIngrese Tiempo de Envio de Cada Paquete")
+	waitingTime, _ := strconv.Atoi(getInput(2))
+	fmt.Printf("\nTiempo: %d\n", waitingTime)
+
 	// Contact the server and print out its response.
 
 	for {
-
-		name := getInput()
-
-		if !(name != "EXIT") {
-			break
-		}
-
-		if len(os.Args) > 1 {
-			name = os.Args[1]
-		}
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-		defer cancel()
-		r, err := c.TrakingRequest(ctx, orden)
-		if err != nil {
-			log.Fatalf("could not greet: %v", err)
-		}
+		realizarEnvio(c, "retail")
+		time.Sleep(3 * time.Second)
+		realizarEnvio(c, "retail")
+		time.Sleep(3 * time.Second)
+		realizarEnvio(c, "pyme")
+		time.Sleep(3 * time.Second)
 	}
 }
