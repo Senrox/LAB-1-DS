@@ -223,7 +223,7 @@ func main() {
 
 	// Codigo para realizer seguimiento
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(time.Duration(waitingTime) * time.Second)
 
 	for {
 		//Ingresar Codigo de Seguimiento
