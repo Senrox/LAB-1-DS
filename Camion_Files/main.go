@@ -73,28 +73,57 @@ func realizarEnvio(c pb.GreeterClient, tipo string) {
 	// esto dentro del codigo de camiones
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	
-	r, err := c.SendInformation(ctx, orden)
+	/*
+		data := &pb.Information{
+			OrderID:      itemI.id,
+			ProductType:  itemI.name,
+			ProductValue: itemI.data[0],
+			Src:          itemI.data[1],
+			Dest:         itemI.data[2],
+			Attemps:      itemI.prioridad,
+			Date:         tipo,
+		}
+	*/
+
+	// PEDIR Y RECIBIR UN PAQUETE
+	data := &pb.DeliveryRequest{
+		R: tipo,
+	}
+	received, err := c.SendInformation(ctx, data)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 
+	var reintento int
 	if tipo == "retail" {
 		reintento = 3
-	} else if tipo == "pyme" {
+	} else { //pyme
 		reintento = 2
 	}
 
-	for i := 0; i < reintento; i++{
+	var try bool
+	var intento int
+	var IntentoFinal string
+	var enviado bool = false
+	var newEstado string = "En Bodega"
+
+	for intento = 0; intento < reintento; intento++ {
 		//hace cosas
 
 		try = Envio()
+		newEstado = "En Camino"
 
 		if try {
-			//intento = 1
+			IntentoFinal = "intento"
+			newEstado = "Recibido"
+			enviado = true
 			break
 		}
-	} 
+	}
+	if !try && enviado == false {
+		IntentoFinal = "reintento"
+		newEstado = "No Recibido"
+	}
 
 }
 

@@ -28,7 +28,7 @@ service Greeter {
   rpc MakeOrder (OrderRequest) returns (OrderConfirmation) {}
   rpc TrackingOrder (TrackingRequest) returns (Status) {}
   rpc TrackingStatus (StatusRequest) returns (StatusResponse) {}
-  rpc SendInformation (Information) returns (HelloReply) {}
+  rpc SendInformation (DeliveryRequest) returns (Information) {}
 }
 
 // The request message containing the user's name.
@@ -81,4 +81,8 @@ message Status {
 message StatusResponse{
   string trackingCode = 1;
   string status = 2;
+}
+
+message DeliveryRequest{
+  string r = 1;
 }

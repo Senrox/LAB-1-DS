@@ -20,6 +20,7 @@
 package main
 
 import (
+	"container/list"
 	"context"
 	"fmt"
 	"log"
@@ -156,12 +157,27 @@ func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb
 // ProductDatabaseByTracking - base de datos de tracking
 var ProductDatabaseByTracking map[string]*Items
 
+var colaPrioritario = list.New()
+var colaNormal = list.New()
+var colaRetail = list.New()
+
 // ProductStatus status de los productos
 var ProductStatus map[string]*ItemStatus
 
 //funcion que almacena datos en un hashmap
 func store(item Items) {
 	ProductDatabaseByTracking[item.tracking] = &item
+}
+
+//funcion que almacena datos en un hashmap
+func storeInList(item *Items) {
+	if item.order_type == "0" {
+		colaNormal.PushBack(item)
+	} else if item.order_type == "1" {
+		colaPrioritario.PushBack(item)
+	} else {
+		colaRetail.PushBack(item)
+	}
 }
 
 func main() {
