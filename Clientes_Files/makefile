@@ -1,2 +1,2 @@
 make:
-	go run make.go
+	go run main.go
