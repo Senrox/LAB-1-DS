@@ -107,7 +107,7 @@ func retailOrders() *list.List {
 
 			producto := Items{id: record[0], name: record[1], prioridad: "2", data: []string{record[2], record[3], record[4]}}
 
-			itemsPyme.PushBack(producto)
+			itemsRetail.PushBack(producto)
 		}
 
 	}
