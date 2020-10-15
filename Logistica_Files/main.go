@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	port       = ":50051"
+	port = ":50051"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -55,6 +55,11 @@ type Items struct {
 	timestamp   string
 }
 
+type ItemStatus struct {
+	trackingCode string
+	status       string
+}
+
 //funcion que retorna el tiempo actual
 func getTime() string {
 	t := time.Now()
@@ -71,7 +76,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 
 var trackingCode int = 1000
 
-// SayHello implements helloworld.GreeterServer
+// Server recibe orden y se evnia codigo de seguimiente
 func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderConfirmation, error) {
 
 	fmt.Println("\n<--------------- NEW ORDER COMES IN!!! --------------->")
@@ -109,24 +114,47 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 	return &pb.OrderConfirmation{Message: strTrackingCode}, nil
 }
 
-// SayHello implements helloworld.GreeterServer
+//consulta de seguimiento a camiones
+/*
+func (s *server) TrackingStatus(ctx context.Context, in *pb.StatusRequest) (*pb.StatusResponse, error) {
+	fmt.Println("\n<--------------- STATUS REQUEST --------------->")
+	fmt.Println()
+	log.Printf("STATUS INFORMATON: %s\n", in.GetTrackingCode())
+
+	var camionesResponse string = ""
+	camionesResponse = &pb.StatusRequest{Message: ProductStatus[in.GetStatus()].status}, nil
+
+	estado := Items{
+		trackingCode: in.GetTrackingCode(),
+		status:       camionesResponse,
+	}
+
+	ProductDatabaseByTracking[in.GetTrackingCode()].status = "New Status" // get status
+
+	store(estado)
+
+	//return &pb.HelloReply{Message: "Sup " + in.GetName()}, nil
+}
+*/
+
+// respuesta a consulta de seguimiento
 func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb.Status, error) {
 
 	fmt.Println("\n<--------------- STATUS REQUEST --------------->")
 	fmt.Println()
 	log.Printf("STATUS INFORMATON: %s\n", in.GetTrackingCode())
 
-	//TODO consulta a maquina camion para saber estado
-
 	//Asignamos estado TEMPORAL
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = "New Status" // get status
 
 	//Codigo de respuesta
 	return &pb.Status{Message: ProductDatabaseByTracking[in.GetTrackingCode()].status}, nil
+
 }
 
 // database
 var ProductDatabaseByTracking map[string]*Items
+var ProductStatus map[string]*ItemStatus
 
 //funcion que almacena datos en un hashmap
 func store(item Items) {

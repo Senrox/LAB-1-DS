@@ -22,18 +22,17 @@ package main
 import (
 	"context"
 	"fmt"
+	pb "helloworld"
 	"log"
 	"os"
 	"time"
-
-	pb "helloworld"
 
 	"google.golang.org/grpc"
 )
 
 const (
 	//address     = ":50051"
-	address     = "10.6.40.169:50051"
+	address     = "dist29:50051"
 	defaultName = "Bro"
 	clientName  = "CAMIONES"
 )
@@ -43,6 +42,22 @@ func getInput() string {
 	var input string
 	fmt.Scanln(&input)
 	return input
+}
+
+//items contiene info acerca de un producto
+type Items struct {
+	id    string
+	tipo  string
+	valor string
+	src   string
+	dest  string
+	reply string
+	date  string
+}
+
+//funcion que almacena datos en un hashmap
+func store(dict map[string]*Items, item Items) {
+	dict[item.id] = &item
 }
 
 func main() {
@@ -67,13 +82,12 @@ func main() {
 		if len(os.Args) > 1 {
 			name = os.Args[1]
 		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		r, err := c.SayHello(ctx, &pb.HelloRequest{Name: name, ClientName: clientName})
+		r, err := c.TrakingRequest(ctx, orden)
 		if err != nil {
 			log.Fatalf("could not greet: %v", err)
 		}
-		log.Printf("Salutation: %s", r.GetMessage())
 	}
-
 }

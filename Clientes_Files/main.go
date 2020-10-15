@@ -20,12 +20,14 @@
 package main
 
 import (
+	"container/list"
 	"context"
 	"encoding/csv"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	pb "helloworld"
@@ -40,7 +42,7 @@ const (
 	clientName  = "CLIENTES"
 )
 
-//items contiene info acerca de un producto
+//Items contiene info acerca de un producto
 type Items struct {
 	id        string
 	name      string
@@ -48,13 +50,8 @@ type Items struct {
 	data      []string
 }
 
-//funcion que almacena datos en un hashmap
-func store(dict map[string]*Items, item Items) {
-	dict[item.id] = &item
-}
-
 //lee pymes.csv y entrega un hashmap con los productos de pymes con prioridad 0 o 1
-func priorityOrders() map[string]*Items {
+func pymeOrders() *list.List {
 	// path to csv
 	fp, err := os.Open("csv_Files/pymes.csv")
 	if err != nil {
@@ -63,7 +60,7 @@ func priorityOrders() map[string]*Items {
 
 	r := csv.NewReader(fp)
 
-	ItemsByID := make(map[string]*Items)
+	itemsPyme := list.New()
 
 	for {
 		record, err := r.Read()
@@ -76,14 +73,14 @@ func priorityOrders() map[string]*Items {
 
 		producto := Items{id: record[0], name: record[1], prioridad: record[5], data: []string{record[2], record[3], record[4]}}
 
-		store(ItemsByID, producto)
+		itemsPyme.PushBack(producto)
 
 	}
-	return ItemsByID
+	return itemsPyme
 }
 
-//lee retail.csv y entrega un hashmap con los productos de retail 2
-func retailOrders(dict map[string]*Items) {
+//lee pymes.csv y entrega un hashmap con los productos de pymes con prioridad 0 o 1
+func retailOrders() *list.List {
 	// path to csv
 	fp, err := os.Open("csv_Files/retail.csv")
 	if err != nil {
@@ -91,6 +88,8 @@ func retailOrders(dict map[string]*Items) {
 	}
 
 	r := csv.NewReader(fp)
+
+	itemsRetail := list.New()
 
 	for {
 		record, err := r.Read()
@@ -101,11 +100,12 @@ func retailOrders(dict map[string]*Items) {
 			log.Fatalln("error reading file: ", err)
 		}
 
-		producto := Items{id: record[0], name: record[1], prioridad: "2", data: []string{record[2], record[3], record[4]}}
+		producto := Items{id: record[0], name: record[1], prioridad: record[5], data: []string{record[2], record[3], record[4]}}
 
-		store(dict, producto)
+		itemsRetail.PushBack(producto)
 
 	}
+	return itemsRetail
 }
 
 //gets input from user
@@ -122,10 +122,62 @@ func getInput(x int) string {
 	return input
 }
 
+/* hacerOrden - hace pedidos automaticamente parra un cliente
+*  p es la lista de la cual hacer el pedido
+*  c es la conexion
+ */
+func hacerOrden(ctx context.Context, p *list.List, c pb.GreeterClient) {
+
+	if p != nil {
+
+		front := p.Front()
+		itemI := Items(front.Value.(Items))
+
+		tipo := "none"
+
+		if itemI.prioridad == "0" {
+			tipo = "Normal"
+		} else if itemI.prioridad == "1" {
+			tipo = "prioritario"
+		} else {
+			tipo = "retail"
+		}
+
+		// generacion de orden
+		orden := &pb.OrderRequest{
+			OrderID:      itemI.id,
+			ProductName:  itemI.name,
+			ProductValue: itemI.data[0],
+			Src:          itemI.data[1],
+			Dest:         itemI.data[2],
+			Priority:     itemI.prioridad,
+			ProductType:  tipo,
+		}
+
+		// Hacer una consulta
+		r, err := c.MakeOrder(ctx, orden)
+		if err != nil {
+			log.Fatalf("could not greet: %v", err)
+		}
+
+		// mostrar codigo seguimiento por pantalla
+		fmt.Print("\n<--------------- INFORMATION --------------->\n")
+		log.Printf("Order Tracking Code: %s\n", r.GetMessage())
+		fmt.Println("\n<--------------- INFORMATION --------------->")
+
+		p.Remove(front)
+	} else {
+		fmt.Println("No hay mas ordenes que enviar.")
+	}
+
+}
+
 func main() {
-	//read csv files
-	itemsPriority := priorityOrders()
-	retailOrders(itemsPriority)
+	//--------------------------------------read csv files and store data
+	pymes := pymeOrders()
+	retails := retailOrders()
+
+	//---------------------------------------
 
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
@@ -134,89 +186,62 @@ func main() {
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
-
-	fmt.Println("yes")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 
 	// Contact the server and print out its response.
 
+	//waiting Time
+	fmt.Println("\nIngrese Tiempo de Espera en Segundos")
+	waitingTime, _ := strconv.Atoi(getInput(2))
+	fmt.Printf("\nTiempo: %d\n", waitingTime)
+
+	//Tipo de Cliente
+	fmt.Println("\nSeleccione tipo de Cliente\n\n\t[1] Pyme\n\t[2] Retail\n\n\tPara Salir: EXIT")
+	opcion := getInput(2)
+	if opcion == "EXIT" {
+		fmt.Println("Saliendo del programa.")
+		os.Exit(3)
+	}
+
+	//Thread hacer ordenes
+	//soy Pyme
+	if opcion == "1" {
+		go hacerOrden(ctx, pymes, c)
+	} else { //Soy Retail
+		go hacerOrden(ctx, retails, c)
+	}
+
+	// Codigo para realizer seguimiento
+
+	time.Sleep((5 * time.Second))
+
 	for {
-
-		fmt.Println("\nSeleccione accion a realizar\n\n\t[1] Hacer Seguimiento\n\t[2] Realizar una Orden\n\n\tPara Salir: EXIT")
-		opcion := getInput(2)
-
-		if opcion == "EXIT" {
+		//Ingresar Codigo de Seguimiento
+		fmt.Println("\nIngrese Codigo de Seguimiento\nPara Salir: EXIT")
+		code := getInput(3)
+		if code == "EXIT" {
 			break
 		}
 
-		//Hacer seguimienteo
-		if opcion == "1" {
-			// get tracking code from user
-			code := getInput(3)
-			if !(code != "EXIT") {
-				break
-			}
-			if len(os.Args) > 1 {
-				code = os.Args[1]
-			}
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-
-			// make tracking request to logistics
-			request := &pb.TrackingRequest{
-				TrackingCode: code,
-			}
-			r, err := c.TrackingOrder(ctx, request)
-			if err != nil {
-				log.Fatalf("could not greet: %v", err)
-			}
-
-			// show user query results
-			fmt.Print("\n<--------------- Status --------------->\n")
-			log.Printf("Order Status: %s\n", r.GetMessage())
-			fmt.Println("\n<--------------- Status --------------->")
-
-		} else { //Hacer pedido
-
-			productID := getInput(1)
-
-			if !(productID != "EXIT") {
-				break
-			}
-			if len(os.Args) > 1 {
-				productID = os.Args[1]
-			}
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-
-			tipo := "none"
-			if itemsPriority[productID].prioridad == "0" {
-				tipo = "Normal"
-			} else if itemsPriority[productID].prioridad == "1" {
-				tipo = "prioritario"
-			} else {
-				tipo = "retail"
-			}
-
-			orden := &pb.OrderRequest{
-				OrderID:      itemsPriority[productID].id,
-				ProductName:  itemsPriority[productID].name,
-				ProductValue: itemsPriority[productID].data[0],
-				Src:          itemsPriority[productID].data[1],
-				Dest:         itemsPriority[productID].data[2],
-				Priority:     itemsPriority[productID].prioridad,
-				ProductType:  tipo,
-			}
-
-			r, err := c.MakeOrder(ctx, orden)
-			if err != nil {
-				log.Fatalf("could not greet: %v", err)
-			}
-
-			// show user query results
-			fmt.Print("\n<--------------- INFORMATION --------------->\n")
-			log.Printf("Order Tracking Code: %s\n", r.GetMessage())
-			fmt.Println("\n<--------------- INFORMATION --------------->")
-
+		if len(os.Args) > 1 {
+			code = os.Args[1]
 		}
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		// make tracking request to logistics
+		request := &pb.TrackingRequest{
+			TrackingCode: code,
+		}
+		r, err := c.TrackingOrder(ctx, request)
+		if err != nil {
+			log.Fatalf("could not greet: %v", err)
+		}
+
+		// show user query results
+		fmt.Print("\n<--------------- Status --------------->\n")
+		log.Printf("Order Status: %s\n", r.GetMessage())
+		fmt.Println("\n<--------------- Status --------------->")
 	}
 }
