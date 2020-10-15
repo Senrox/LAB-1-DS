@@ -71,9 +71,12 @@ func pymeOrders() *list.List {
 			log.Fatalln("error reading file: ", err)
 		}
 
-		producto := Items{id: record[0], name: record[1], prioridad: record[5], data: []string{record[2], record[3], record[4]}}
+		if record[0] != "id" {
 
-		itemsPyme.PushBack(producto)
+			producto := Items{id: record[0], name: record[1], prioridad: record[5], data: []string{record[2], record[3], record[4]}}
+
+			itemsPyme.PushBack(producto)
+		}
 
 	}
 	return itemsPyme
@@ -100,9 +103,12 @@ func retailOrders() *list.List {
 			log.Fatalln("error reading file: ", err)
 		}
 
-		producto := Items{id: record[0], name: record[1], prioridad: "2", data: []string{record[2], record[3], record[4]}}
+		if record[0] != "id" {
 
-		itemsRetail.PushBack(producto)
+			producto := Items{id: record[0], name: record[1], prioridad: "2", data: []string{record[2], record[3], record[4]}}
+
+			itemsPyme.PushBack(producto)
+		}
 
 	}
 	return itemsRetail
@@ -171,7 +177,6 @@ func hacerOrden(p *list.List, c pb.GreeterClient) {
 	} else {
 		fmt.Println("No hay mas ordenes que enviar.")
 	}
-
 }
 
 func main() {
