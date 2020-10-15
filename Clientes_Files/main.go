@@ -126,7 +126,7 @@ func getInput(x int) string {
 *  p es la lista de la cual hacer el pedido
 *  c es la conexion
  */
-func hacerOrden(ctx context.Context, p *list.List, c pb.GreeterClient) {
+func hacerOrden(p *list.List, c pb.GreeterClient) {
 
 	if p != nil {
 
@@ -154,6 +154,8 @@ func hacerOrden(ctx context.Context, p *list.List, c pb.GreeterClient) {
 			ProductType:  tipo,
 		}
 
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
 		// Hacer una consulta
 		r, err := c.MakeOrder(ctx, orden)
 		if err != nil {
@@ -186,8 +188,6 @@ func main() {
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
 
 	// Contact the server and print out its response.
 
@@ -207,9 +207,9 @@ func main() {
 	//Thread hacer ordenes
 	//soy Pyme
 	if opcion == "1" {
-		go hacerOrden(ctx, pymes, c)
+		go hacerOrden(pymes, c)
 	} else { //Soy Retail
-		go hacerOrden(ctx, retails, c)
+		go hacerOrden(retails, c)
 	}
 
 	// Codigo para realizer seguimiento
