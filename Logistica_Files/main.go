@@ -149,13 +149,12 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	if tipoCamion == "retail" {
 		if colaRetail != nil {
 			front := colaRetail.Front()
-			itemI = Items(front.Value.(Items))
+			itemI = Items(colaRetail.Remove(front).(Items))
 			colaRetail.Remove(front)
 
 		} else if colaPrioritario != nil {
 			front := colaPrioritario.Front()
-			itemI = Items(front.Value.(Items))
-			colaPrioritario.Remove(front)
+			itemI = Items(colaPrioritario.Remove(front).(Items))
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
@@ -164,13 +163,11 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	} else {
 		if colaPrioritario != nil {
 			front := colaPrioritario.Front()
-			itemI = Items(front.Value.(Items))
-			colaPrioritario.Remove(front)
+			itemI = Items(colaPrioritario.Remove(front).(Items))
 
 		} else if colaNormal != nil {
 			front := colaNormal.Front()
-			itemI = Items(front.Value.(Items))
-			colaNormal.Remove(front)
+			itemI = Items(colaNormal.Remove(front).(Items))
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
@@ -201,7 +198,6 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 			Attempts:     "", //Se modifica en la otra func, realizar envio,
 			Date:         getTime(),
 		}
-		fmt.Println(itemI.tracking)
 		return ret, nil
 	}
 	var str string
