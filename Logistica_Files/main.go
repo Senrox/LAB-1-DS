@@ -131,17 +131,6 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 	fmt.Println()
 
-	var str string
-	dat := pb.Information{
-		OrderID:      str,
-		ProductType:  str,
-		ProductValue: str,
-		Src:          str,
-		Dest:         str,
-		Attempts:     str,
-		Date:         str,
-	}
-
 	tipoCamion := in.GetR()
 
 	/*
@@ -153,6 +142,7 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		l.Remove(front)
 	*/
 	var itemI Items
+	var flag bool
 
 	if tipoCamion == "retail" {
 		if colaRetail != nil {
@@ -165,7 +155,7 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
-			return &dat, nil
+			flag = false
 		}
 	} else {
 		if colaPrioritario != nil {
@@ -178,7 +168,7 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
-			return &dat, nil
+			flag = false
 		}
 	}
 
@@ -195,15 +185,27 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		timestamp   string
 	}*/
 
-	dat.OrderID = itemI.tracking
-	dat.ProductType = itemI.order_type
-	dat.ProductValue = itemI.order_value
-	dat.Src = itemI.order_src
-	dat.Dest = itemI.order_dest
-	dat.Attempts = "" //Se modifica en la otra func, realizar envio
-	dat.Date = getTime()
-
-	return &dat, nil
+	if flag {
+		return &pb.Information{
+			OrderID:      itemI.tracking,
+			ProductType:  itemI.order_type,
+			ProductValue: itemI.order_value,
+			Src:          itemI.order_src,
+			Dest:         itemI.order_dest,
+			Attempts:     "", //Se modifica en la otra func, realizar envio,
+			Date:         getTime(),
+		}, nil
+	}
+	var str string
+	return &pb.Information{
+		OrderID:      str,
+		ProductType:  str,
+		ProductValue: str,
+		Src:          str,
+		Dest:         str,
+		Attempts:     str,
+		Date:         str,
+	}, nil
 }
 
 // respuesta a consulta de seguimiento
