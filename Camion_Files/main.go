@@ -174,13 +174,13 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	fmt.Printf("\nNumero de intentos: %s", IntentoFinal)
 
 	// agregar numero de intentos
-	orderUpdate := pb.StatusResponse{
+	orderUpdate := &pb.StatusResponse{
 		TrackingCode: received.OrderID,
 		Status:       newEstado,
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), &time.Second)
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	m, err4 := c.TrackingStatus(ctx, orderUpdate)
+	m, err := c.TrackingStatus(ctx, orderUpdate)
 	if err != nil {
 		log.Fatalf("could not greet: %v%s", err, m)
 	}
