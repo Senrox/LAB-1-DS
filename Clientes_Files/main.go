@@ -185,7 +185,6 @@ func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
 
 		}
 	}
-	fmt.Println("No hay mas ordenes que enviar.")
 }
 
 func main() {
