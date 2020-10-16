@@ -76,7 +76,9 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 		log.Fatalf("\ncould not greet: %v", err)
 	}
 
-	fmt.Println(received)
+	if received.OrderID == "" {
+
+	}
 
 	var try bool
 

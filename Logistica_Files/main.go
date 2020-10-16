@@ -144,7 +144,7 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	*/
 	var itemI Items
 	var itemII Items
-	var flag bool
+	var flag = true
 
 	if tipoCamion == "retail" {
 		if colaRetail != nil {
