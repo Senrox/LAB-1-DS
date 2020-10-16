@@ -183,9 +183,8 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	m, err := c.TrackingStatus(ctx, orderUpdate)
-	m.Message = ""
 	if err != nil {
-		log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s\n", err, received.OrderID, newEstado)
+		log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m.Message)
 	}
 
 }
