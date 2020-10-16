@@ -132,7 +132,6 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 
 	tipoCamion := in.GetR()
-
 	fmt.Printf("Tipo Camion: %s\n", tipoCamion)
 
 	/*
@@ -144,17 +143,21 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		l.Remove(front)
 	*/
 	var itemI Items
+	var itemII Items
 	var flag bool
 
 	if tipoCamion == "retail" {
 		if colaRetail != nil {
 			front := colaRetail.Front()
-			itemI = Items(colaRetail.Remove(front).(Items))
+			itemI = Items(front.Value.(Items))
+			itemII = itemI
 			colaRetail.Remove(front)
 
 		} else if colaPrioritario != nil {
 			front := colaPrioritario.Front()
-			itemI = Items(colaPrioritario.Remove(front).(Items))
+			itemI = Items(front.Value.(Items))
+			itemII = itemI
+			colaPrioritario.Remove(front)
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
@@ -163,11 +166,15 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	} else {
 		if colaPrioritario != nil {
 			front := colaPrioritario.Front()
-			itemI = Items(colaPrioritario.Remove(front).(Items))
+			itemI = Items(front.Value.(Items))
+			itemII = itemI
+			colaPrioritario.Remove(front)
 
 		} else if colaNormal != nil {
 			front := colaNormal.Front()
-			itemI = Items(colaNormal.Remove(front).(Items))
+			itemI = Items(front.Value.(Items))
+			itemII = itemI
+			colaNormal.Remove(front)
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
@@ -189,17 +196,15 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	}*/
 
 	if flag {
-		ret := &pb.Information{
-			OrderID:      itemI.tracking,
-			ProductType:  itemI.order_type,
-			ProductValue: itemI.order_value,
-			Src:          itemI.order_src,
-			Dest:         itemI.order_dest,
+		return &pb.Information{
+			OrderID:      itemII.tracking,
+			ProductType:  itemII.order_type,
+			ProductValue: itemII.order_value,
+			Src:          itemII.order_src,
+			Dest:         itemII.order_dest,
 			Attempts:     "", //Se modifica en la otra func, realizar envio,
 			Date:         getTime(),
-		}
-		fmt.Println(ret)
-		return ret, nil
+		}, nil
 	}
 	var str string
 	return &pb.Information{
