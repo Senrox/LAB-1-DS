@@ -132,7 +132,7 @@ func (s *server) sendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	fmt.Println()
 
 	var str string
-	dat := &pb.Information{
+	dat := pb.Information{
 		OrderID:      str,
 		ProductType:  str,
 		ProductValue: str,
@@ -165,7 +165,7 @@ func (s *server) sendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
-			return dat, nil
+			return &dat, nil
 		}
 	} else {
 		if colaPrioritario != nil {
@@ -178,7 +178,7 @@ func (s *server) sendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
-			return dat, nil
+			return &dat, nil
 		}
 	}
 
@@ -203,7 +203,7 @@ func (s *server) sendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	dat.Attempts = "" //Se modifica en la otra func, realizar envio
 	dat.Date = getTime()
 
-	return dat, nil
+	return &dat, nil
 }
 
 // respuesta a consulta de seguimiento
