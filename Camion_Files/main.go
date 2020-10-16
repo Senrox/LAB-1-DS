@@ -76,119 +76,119 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 		log.Fatalf("\ncould not greet: %v", err)
 	}
 
-	if received.OrderID == "" {
+	if received.OrderID != "" {
+		var try bool
 
-	}
+		var intento int
+		var Nintentos int
 
-	var try bool
+		var IntentoFinal string
+		var enviado bool = false
+		var newEstado string = "En Bodega"
 
-	var intento int
-	var Nintentos int
+		var precio string = received.GetProductValue()
+		value, _ := strconv.Atoi(precio)
 
-	var IntentoFinal string
-	var enviado bool = false
-	var newEstado string = "En Bodega"
+		if tipo == "retail" {
+			fmt.Print("\nRealizo pedido de retail")
 
-	var precio string = received.GetProductValue()
-	value, _ := strconv.Atoi(precio)
+			for intento = 0; intento < 3; intento++ {
+				//hace cosas
 
-	if tipo == "retail" {
-		fmt.Print("\nRealizo pedido de retail")
+				try = Envio()
+				newEstado = "En Camino"
+				fmt.Print("\nNuevo estado: En camino")
 
-		for intento = 0; intento < 3; intento++ {
-			//hace cosas
+				if try {
+					IntentoFinal = strconv.Itoa(intento)
+					newEstado = "Recibido"
+					fmt.Print("\nNuevo estado: Recibido")
+					enviado = true
+					break
+				}
+				// ACTUALIZAR ESTADO PAQUETE
+				dat := &pb.StatusResponse{
+					TrackingCode: received.OrderID,
+					Status:       newEstado,
+				}
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				received1, err := c.TrackingStatus(ctx, dat)
+				if err != nil {
+					log.Fatalf("\ncould not greet with retail: %v%s", err, received1)
+				}
 
-			try = Envio()
-			newEstado = "En Camino"
-			fmt.Print("\nNuevo estado: En camino")
-
-			if try {
-				IntentoFinal = strconv.Itoa(intento)
-				newEstado = "Recibido"
-				fmt.Print("\nNuevo estado: Recibido")
-				enviado = true
-				break
+				// tiempo de espera despues de un envio
+				time.Sleep(time.Duration(intentoTime) * time.Second)
 			}
-			// ACTUALIZAR ESTADO PAQUETE
-			dat := &pb.StatusResponse{
-				TrackingCode: received.OrderID,
-				Status:       newEstado,
+			if !try && enviado == false {
+				IntentoFinal = "3"
+				newEstado = "No Recibido"
+				fmt.Print("\nNuevo estado: No Recibido")
 			}
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			received1, err := c.TrackingStatus(ctx, dat)
-			if err != nil {
-				log.Fatalf("\ncould not greet with retail: %v%s", err, received1)
+		} else { //pyme
+			fmt.Print("\nRealizo pedido de pyme")
+			if value < 10 {
+				Nintentos = 1 // 1 base + 0 extra
+			} else if value < 20 {
+				Nintentos = 2 // 1 base + 1 extra
+			} else { // mayor a 20
+				Nintentos = 3 // 1 base + 2 extra
 			}
 
-			// tiempo de espera despues de un envio
-			time.Sleep(time.Duration(intentoTime) * time.Second)
+			for intento = 0; intento < Nintentos; intento++ {
+				//hace cosas
+
+				try = Envio()
+				fmt.Print("\nNuevo estado: En camino")
+				newEstado = "En Camino"
+
+				if try {
+					IntentoFinal = strconv.Itoa(intento)
+					newEstado = "Recibido"
+					fmt.Print("\nNuevo estado: Recibido")
+					enviado = true
+					break
+				}
+				// ACTUALIZAR ESTADO PAQUETE
+				dat := &pb.StatusResponse{
+					TrackingCode: received.OrderID,
+					Status:       newEstado,
+				}
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				received1, err := c.TrackingStatus(ctx, dat)
+				if err != nil {
+					log.Fatalf("\ncould not greet with pyme: %v%s", err, received1)
+				}
+
+				// tiempo de espera despues de un envio
+				time.Sleep(time.Duration(intentoTime) * time.Second)
+			}
+			if !try && enviado == false {
+				IntentoFinal = strconv.Itoa(Nintentos)
+				newEstado = "No Recibido"
+				fmt.Print("\nNuevo estado: No Recibido")
+			}
+
 		}
-		if !try && enviado == false {
-			IntentoFinal = "3"
-			newEstado = "No Recibido"
-			fmt.Print("\nNuevo estado: No Recibido")
+
+		received.Attempts = IntentoFinal
+		fmt.Printf("\nNumero de intentos: %s\n", IntentoFinal)
+
+		// agregar numero de intentos
+		orderUpdate := &pb.StatusResponse{
+			TrackingCode: received.OrderID,
+			Status:       newEstado,
 		}
-	} else { //pyme
-		fmt.Print("\nRealizo pedido de pyme")
-		if value < 10 {
-			Nintentos = 1 // 1 base + 0 extra
-		} else if value < 20 {
-			Nintentos = 2 // 1 base + 1 extra
-		} else { // mayor a 20
-			Nintentos = 3 // 1 base + 2 extra
+		ctx, cancel = context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		m, err := c.TrackingStatus(ctx, orderUpdate)
+		if err != nil {
+			log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m)
 		}
-
-		for intento = 0; intento < Nintentos; intento++ {
-			//hace cosas
-
-			try = Envio()
-			fmt.Print("\nNuevo estado: En camino")
-			newEstado = "En Camino"
-
-			if try {
-				IntentoFinal = strconv.Itoa(intento)
-				newEstado = "Recibido"
-				fmt.Print("\nNuevo estado: Recibido")
-				enviado = true
-				break
-			}
-			// ACTUALIZAR ESTADO PAQUETE
-			dat := &pb.StatusResponse{
-				TrackingCode: received.OrderID,
-				Status:       newEstado,
-			}
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			received1, err := c.TrackingStatus(ctx, dat)
-			if err != nil {
-				log.Fatalf("\ncould not greet with pyme: %v%s", err, received1)
-			}
-
-			// tiempo de espera despues de un envio
-			time.Sleep(time.Duration(intentoTime) * time.Second)
-		}
-		if !try && enviado == false {
-			IntentoFinal = strconv.Itoa(Nintentos)
-			newEstado = "No Recibido"
-			fmt.Print("\nNuevo estado: No Recibido")
-		}
-
-	}
-
-	received.Attempts = IntentoFinal
-	fmt.Printf("\nNumero de intentos: %s\n", IntentoFinal)
-
-	// agregar numero de intentos
-	orderUpdate := &pb.StatusResponse{
-		TrackingCode: received.OrderID,
-		Status:       newEstado,
-	}
-	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	m, err := c.TrackingStatus(ctx, orderUpdate)
-	if err != nil {
-		log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m)
+	} else {
+		fmt.Println("\nNo hay ordenes pendientes")
 	}
 
 }

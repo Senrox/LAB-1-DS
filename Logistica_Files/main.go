@@ -147,13 +147,13 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	var flag = true
 
 	if tipoCamion == "retail" {
-		if colaRetail != nil {
+		if colaRetail.Front() != nil {
 			front := colaRetail.Front()
 			itemI = Items(front.Value.(Items))
 			itemII = itemI
 			colaRetail.Remove(front)
 
-		} else if colaPrioritario != nil {
+		} else if colaPrioritario.Front() != nil {
 			front := colaPrioritario.Front()
 			itemI = Items(front.Value.(Items))
 			itemII = itemI
@@ -164,13 +164,13 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 			flag = false
 		}
 	} else {
-		if colaPrioritario != nil {
+		if colaPrioritario.Front() != nil {
 			front := colaPrioritario.Front()
 			itemI = Items(front.Value.(Items))
 			itemII = itemI
 			colaPrioritario.Remove(front)
 
-		} else if colaNormal != nil {
+		} else if colaNormal.Front() != nil {
 			front := colaNormal.Front()
 			itemI = Items(front.Value.(Items))
 			itemII = itemI
@@ -194,7 +194,6 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		status      string
 		timestamp   string
 	}*/
-	fmt.Println(itemII.tracking)
 	if flag {
 		return &pb.Information{
 			OrderID:      itemII.tracking,
