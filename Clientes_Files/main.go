@@ -134,6 +134,8 @@ func getInput(x int) string {
  */
 func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
 
+	fmt.Printf("%d\n", p.Len())
+
 	for {
 		//TODO ejecutar el for hasta el largo de la lista
 		if p != nil {
