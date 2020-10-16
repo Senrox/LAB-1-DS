@@ -183,8 +183,9 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	m, err := c.TrackingStatus(ctx, orderUpdate)
+	m.Message = ""
 	if err != nil {
-		log.Fatalf("\ncould not greet at the end: %v%s", err, m)
+		log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s\n", err, received.OrderID, newEstado)
 	}
 
 }
@@ -214,7 +215,7 @@ func main() {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("\ndid not connect: %v", err)
+		log.Fatalf("\ndid not connect with server: %v", err)
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
