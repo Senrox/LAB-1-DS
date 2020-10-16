@@ -33,7 +33,7 @@ import (
 
 const (
 	//address     = ":50051"
-	address     = "dist29:50051"
+	address     = "dist29:50052"
 	defaultName = "Bro"
 	clientName  = "CAMIONES"
 )
