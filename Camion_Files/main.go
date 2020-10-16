@@ -99,7 +99,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			fmt.Print("\nNuevo estado: En camino")
 
 			if try {
-				IntentoFinal = "intento"
+				IntentoFinal = strconv.Itoa(intento)
 				newEstado = "Recibido"
 				fmt.Print("\nNuevo estado: Recibido")
 				enviado = true
@@ -107,7 +107,8 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			}
 			// ACTUALIZAR ESTADO PAQUETE
 			dat := &pb.StatusResponse{
-				TrackingCode: newEstado,
+				TrackingCode: received.OrderID,
+				Status:       newEstado,
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
@@ -142,7 +143,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			newEstado = "En Camino"
 
 			if try {
-				IntentoFinal = "intento"
+				IntentoFinal = strconv.Itoa(intento)
 				newEstado = "Recibido"
 				fmt.Print("\nNuevo estado: Recibido")
 				enviado = true
@@ -150,7 +151,8 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			}
 			// ACTUALIZAR ESTADO PAQUETE
 			dat := &pb.StatusResponse{
-				TrackingCode: newEstado,
+				TrackingCode: received.OrderID,
+				Status:       newEstado,
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
