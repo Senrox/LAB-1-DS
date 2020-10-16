@@ -178,8 +178,6 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		}
 	}
 
-	fmt.Println(itemI)
-
 	/*Items
 	type Items struct {
 		id          string
@@ -194,7 +192,7 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	}*/
 
 	if flag {
-		return &pb.Information{
+		ret := &pb.Information{
 			OrderID:      itemI.tracking,
 			ProductType:  itemI.order_type,
 			ProductValue: itemI.order_value,
@@ -202,7 +200,9 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 			Dest:         itemI.order_dest,
 			Attempts:     "", //Se modifica en la otra func, realizar envio,
 			Date:         getTime(),
-		}, nil
+		}
+		fmt.Println(ret)
+		return ret, nil
 	}
 	var str string
 	return &pb.Information{
