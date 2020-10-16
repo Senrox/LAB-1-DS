@@ -64,14 +64,14 @@ func Envio() bool {
 func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 
 	// esto dentro del codigo de camiones
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
 
 	// PEDIR Y RECIBIR UN PAQUETE
-	dat := &pb.DeliveryRequest{
+	dat := pb.DeliveryRequest{
 		R: tipo,
 	}
-	received, err := c.SendInformation(ctx, dat)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	received, err := c.SendInformation(ctx, &dat)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}

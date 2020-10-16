@@ -127,7 +127,7 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 
 //consulta de seguimiento a camiones
 
-func (s *server) sendInformation(ctx context.Context, in *pb.DeliveryRequest) (*pb.Information, error) {
+func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*pb.Information, error) {
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 	fmt.Println()
 
@@ -272,12 +272,12 @@ func camiones() {
 	fmt.Print("Waitin for my trucks, I'm the mothafucka T.R.U.C.K.")
 	lis, err := net.Listen("tcp", portCamiones)
 	if err != nil {
-		log.Fatalf("failed to listen1: %v", err)
+		log.Fatalf("failed to listen2: %v", err)
 	}
 	s := grpc.NewServer()
 	pb.RegisterGreeterServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve s1: %v", err)
+		log.Fatalf("failed to serve s2: %v", err)
 	}
 }
 
