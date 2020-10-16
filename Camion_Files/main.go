@@ -112,9 +112,9 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			received, err := c.TrackingStatus(ctx, dat)
+			received1, err := c.TrackingStatus(ctx, dat)
 			if err != nil {
-				log.Fatalf("\ncould not greet with retail: %v%s", err, received)
+				log.Fatalf("\ncould not greet with retail: %v%s", err, received1)
 			}
 
 			// tiempo de espera despues de un envio
@@ -156,9 +156,9 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			received, err := c.TrackingStatus(ctx, dat)
+			received1, err := c.TrackingStatus(ctx, dat)
 			if err != nil {
-				log.Fatalf("\ncould not greet with pyme: %v%s", err, received)
+				log.Fatalf("\ncould not greet with pyme: %v%s", err, received1)
 			}
 
 			// tiempo de espera despues de un envio
