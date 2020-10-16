@@ -128,10 +128,12 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 //consulta de seguimiento a camiones
 
 func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*pb.Information, error) {
+
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
-	fmt.Println()
 
 	tipoCamion := in.GetR()
+
+	fmt.Printf("Tipo Camion: %s\n", tipoCamion)
 
 	/*
 		front := l.Front()
@@ -148,10 +150,12 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		if colaRetail != nil {
 			front := colaRetail.Front()
 			itemI = Items(front.Value.(Items))
+			colaRetail.Remove(front)
 
 		} else if colaPrioritario != nil {
 			front := colaPrioritario.Front()
 			itemI = Items(front.Value.(Items))
+			colaPrioritario.Remove(front)
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
@@ -161,16 +165,20 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		if colaPrioritario != nil {
 			front := colaPrioritario.Front()
 			itemI = Items(front.Value.(Items))
+			colaPrioritario.Remove(front)
 
 		} else if colaNormal != nil {
 			front := colaNormal.Front()
 			itemI = Items(front.Value.(Items))
+			colaNormal.Remove(front)
 
 		} else {
 			fmt.Print("No hay entregas para realizar")
 			flag = false
 		}
 	}
+
+	fmt.Println(itemI)
 
 	/*Items
 	type Items struct {
