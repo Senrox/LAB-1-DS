@@ -135,10 +135,15 @@ func getInput(x int) string {
 func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
 
 	fmt.Printf("%d\n", p.Len())
+	var i int
 
-	for {
+	for i = 0; i < p.Len(); i++ {
 		//TODO ejecutar el for hasta el largo de la lista
-		if p != nil {
+		if p == nil {
+			fmt.Println("No hay mas ordenes que enviar.")
+			break
+
+		} else {
 			// waiting time
 			time.Sleep(time.Duration(waitingTime) * time.Second)
 
@@ -181,8 +186,6 @@ func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
 
 			p.Remove(front)
 
-		} else {
-			fmt.Println("No hay mas ordenes que enviar.")
 		}
 	}
 	fmt.Println("No hay mas ordenes que enviar.")
