@@ -66,12 +66,12 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	// esto dentro del codigo de camiones
 
 	// PEDIR Y RECIBIR UN PAQUETE
-	dat := pb.DeliveryRequest{
+	dat := &pb.DeliveryRequest{
 		R: tipo,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	received, err := c.SendInformation(ctx, &dat)
+	received, err := c.SendInformation(ctx, dat)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
@@ -106,12 +106,14 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				break
 			}
 			// ACTUALIZAR ESTADO PAQUETE
-			data := &pb.StatusResponse{
+			dat2 := &pb.StatusResponse{
 				TrackingCode: newEstado,
 			}
-			received, err := c.TrackingStatus(ctx, data)
+			ctx2, cancel2 := context.WithTimeout(context.Background(), time.Second)
+			defer cancel2()
+			received2, err2 := c.TrackingStatus(ctx2, dat2)
 			if err != nil {
-				log.Fatalf("could not greet: %v%s", err, received)
+				log.Fatalf("could not greet: %v%s", err2, received2)
 			}
 
 			// tiempo de espera despues de un envio
@@ -147,12 +149,14 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				break
 			}
 			// ACTUALIZAR ESTADO PAQUETE
-			data := &pb.StatusResponse{
+			dat3 := &pb.StatusResponse{
 				TrackingCode: newEstado,
 			}
-			received, err := c.TrackingStatus(ctx, data)
-			if err != nil {
-				log.Fatalf("could not greet: %v%s", err, received)
+			ctx3, cancel3 := context.WithTimeout(context.Background(), time.Second)
+			defer cancel3()
+			received3, err3 := c.TrackingStatus(ctx3, dat3)
+			if err3 != nil {
+				log.Fatalf("could not greet: %v%s", err3, received3)
 			}
 
 			// tiempo de espera despues de un envio
@@ -167,15 +171,18 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	}
 
 	received.Attempts = IntentoFinal
-	fmt.Print("\nNumero de intentos: %d", IntentoFinal)
+	fmt.Printf("\nNumero de intentos: %s", IntentoFinal)
 
+	// agregar numero de intentos
 	orderUpdate := &pb.StatusResponse{
 		TrackingCode: received.OrderID,
 		Status:       newEstado,
 	}
-	m, err := c.TrackingStatus(ctx, orderUpdate)
+	ctx4, cancel4 := context.WithTimeout(context.Background(), time.Second)
+	defer cancel4()
+	m, err4 := c.TrackingStatus(ctx4, orderUpdate)
 	if err != nil {
-		log.Fatalf("could not greet: %v%s", err, m)
+		log.Fatalf("could not greet: %v%s", err4, m)
 	}
 
 }
@@ -211,7 +218,7 @@ func main() {
 	c := pb.NewGreeterClient(conn)
 
 	//waiting Time 1
-	fmt.Println("\nIngrese tiempo de envio entre cada paquete")
+	fmt.Println("\nIngrese tiempo entre cada intento de envio de paquete")
 	intentoTime, _ := strconv.Atoi(getInput(2))
 	fmt.Printf("\nTiempo: %d\n", intentoTime)
 
