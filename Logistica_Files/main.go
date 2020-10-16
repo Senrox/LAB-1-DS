@@ -194,7 +194,7 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		status      string
 		timestamp   string
 	}*/
-
+	fmt.Println(itemII.tracking)
 	if flag {
 		return &pb.Information{
 			OrderID:      itemII.tracking,
