@@ -35,7 +35,9 @@ import (
 )
 
 const (
-	port = ":50051"
+	portClientes = ":50051"
+	portCamiones = ":50052"
+	portFinazas  = ":50053"
 )
 
 // server is used to implement helloworld.GreeterServer.
@@ -61,6 +63,13 @@ type ItemStatus struct {
 	status       string
 }
 
+// ProductDatabaseByTracking - base de datos de tracking
+var ProductDatabaseByTracking map[string]*Items
+
+var colaPrioritario = list.New()
+var colaNormal = list.New()
+var colaRetail = list.New()
+
 //funcion que retorna el tiempo actual
 func getTime() string {
 	t := time.Now()
@@ -83,7 +92,7 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 	fmt.Println("\n<--------------- NEW ORDER COMES IN!!! --------------->")
 	log.Printf("ORDER INFORMATON:")
 
-	trackingCode += 1
+	trackingCode++
 
 	strTrackingCode := strconv.Itoa(trackingCode)
 
@@ -108,58 +117,122 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 	}
 
 	store(orden)
+	//generar codigo para enviar a las colas
 
-	//TODO generar codigo para enviar a las colas
+	storeInList(orden)
 
 	//Codigo de seguimiento para el cliente
 	return &pb.OrderConfirmation{Message: strTrackingCode}, nil
 }
 
 //consulta de seguimiento a camiones
-/*
-func (s *server) sendInformation(ctx context.Context, in *pb.Information) (*pb.HelloReply, error) {
+
+func (s *server) sendInformation(ctx context.Context, in *pb.DeliveryRequest) (*pb.Information, error) {
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 	fmt.Println()
 
-	data := &pb.Information{
-		OrderID:      itemI.id,
-		ProductType:  itemI.name,
-		ProductValue: itemI.data[0],
-		Src:          itemI.data[1],
-		Dest:         itemI.data[2],
-		Attemps:      itemI.prioridad,
-		Date:         tipo,
+	var str string
+	dat := &pb.Information{
+		OrderID:      str,
+		ProductType:  str,
+		ProductValue: str,
+		Src:          str,
+		Dest:         str,
+		Attempts:     str,
+		Date:         str,
 	}
 
-	ProductDatabaseByTracking[in.GetTrackingCode()].status = "New Status" // get status
+	tipoCamion := in.GetR()
 
-	store(estado)
+	/*
+		front := l.Front()
+		itemI := Items(front.Value.(Items))
 
-	return &pb.HelloReply{Message: "Status" + in.GetName()}, nil
+		do stuff
+
+		l.Remove(front)
+	*/
+	var itemI Items
+
+	if tipoCamion == "retail" {
+		if colaRetail != nil {
+			front := colaRetail.Front()
+			itemI = Items(front.Value.(Items))
+
+		} else if colaPrioritario != nil {
+			front := colaPrioritario.Front()
+			itemI = Items(front.Value.(Items))
+
+		} else {
+			fmt.Print("No hay entregas para realizar")
+			return dat, nil
+		}
+	} else {
+		if colaPrioritario != nil {
+			front := colaPrioritario.Front()
+			itemI = Items(front.Value.(Items))
+
+		} else if colaNormal != nil {
+			front := colaNormal.Front()
+			itemI = Items(front.Value.(Items))
+
+		} else {
+			fmt.Print("No hay entregas para realizar")
+			return dat, nil
+		}
+	}
+
+	/*Items
+	type Items struct {
+		id          string
+		name        string
+		order_type  string
+		order_dest  string
+		order_src   string
+		order_value string
+		tracking    string
+		status      string
+		timestamp   string
+	}*/
+
+	dat.OrderID = itemI.tracking
+	dat.ProductType = itemI.order_type
+	dat.ProductValue = itemI.order_value
+	dat.Src = itemI.order_src
+	dat.Dest = itemI.order_dest
+	dat.Attempts = "" //Se modifica en la otra func, realizar envio
+	dat.Date = getTime()
+
+	return dat, nil
 }
-*/
 
 // respuesta a consulta de seguimiento
+// cliente <-> servidor
 func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb.Status, error) {
 
 	fmt.Println("\n<--------------- STATUS REQUEST --------------->")
 	fmt.Println()
 	log.Printf("STATUS INFORMATON: %s\n", in.GetTrackingCode())
 
-	//Asignamos estado TEMPORAL
-	ProductDatabaseByTracking[in.GetTrackingCode()].status = "New Status" // get status
-
 	//Codigo de respuesta
 	return &pb.Status{Message: ProductDatabaseByTracking[in.GetTrackingCode()].status}, nil
-
 }
 
-// ProductDatabaseByTracking - base de datos de tracking
-var ProductDatabaseByTracking map[string]*Items
+// actualizacion de estados
+// camoines <-> servidor
+func (s *server) TrackingStatus(ctx context.Context, in *pb.StatusResponse) (*pb.MsgGenerico, error) {
 
-var colaPrioritario = list.New()
-var colaNormal = list.New()
-var colaRetail = list.New()
+	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
+
+	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
+	fmt.Println()
+	log.Printf("Tracking Code: %s\n", in.GetTrackingCode())
+	log.Printf("STATUS INFORMATON: %s\n", in.GetStatus())
+
+	//Codigo de respuesta
+	var str string
+	return &pb.MsgGenerico{Message: str}, nil
+}
 
 // ProductStatus status de los productos
 var ProductStatus map[string]*ItemStatus
@@ -170,7 +243,7 @@ func store(item Items) {
 }
 
 //funcion que almacena datos en un hashmap
-func storeInList(item *Items) {
+func storeInList(item Items) {
 	if item.order_type == "0" {
 		colaNormal.PushBack(item)
 	} else if item.order_type == "1" {
@@ -180,13 +253,10 @@ func storeInList(item *Items) {
 	}
 }
 
-func main() {
-
-	ProductDatabaseByTracking = make(map[string]*Items)
-
-	//-----------------------------------------------------> Server1
-	fmt.Printf("Waitin for my bro, date is: %s\n", getTime())
-	lis, err := net.Listen("tcp", port)
+func clientes() {
+	//--------------------------------------------------------------> Server1
+	fmt.Print("Waitin for my CLientes amigos")
+	lis, err := net.Listen("tcp", portClientes)
 	if err != nil {
 		log.Fatalf("failed to listen1: %v", err)
 	}
@@ -195,5 +265,28 @@ func main() {
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve s1: %v", err)
 	}
+}
+
+func camiones() {
+	//--------------------------------------------------------------> Server1
+	fmt.Print("Waitin for my trucks, I'm the mothafucka T.R.U.C.K.")
+	lis, err := net.Listen("tcp", portCamiones)
+	if err != nil {
+		log.Fatalf("failed to listen1: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterGreeterServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve s1: %v", err)
+	}
+}
+
+func main() {
+
+	ProductDatabaseByTracking = make(map[string]*Items)
+
+	go camiones()
+
+	clientes()
 
 }

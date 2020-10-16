@@ -38,13 +38,6 @@ const (
 	clientName  = "CAMIONES"
 )
 
-func getInput() string {
-	fmt.Println("Inserte nombre: ")
-	var input string
-	fmt.Scanln(&input)
-	return input
-}
-
 //items contiene info acerca de un producto
 type Items struct {
 	id    string
@@ -68,63 +61,144 @@ func Envio() bool {
 	return false
 }
 
-func realizarEnvio(c pb.GreeterClient, tipo string) {
+func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 
 	// esto dentro del codigo de camiones
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	/*
-		data := &pb.Information{
-			OrderID:      itemI.id,
-			ProductType:  itemI.name,
-			ProductValue: itemI.data[0],
-			Src:          itemI.data[1],
-			Dest:         itemI.data[2],
-			Attemps:      itemI.prioridad,
-			Date:         tipo,
-		}
-	*/
 
 	// PEDIR Y RECIBIR UN PAQUETE
-	data := &pb.DeliveryRequest{
+	dat := &pb.DeliveryRequest{
 		R: tipo,
 	}
-	received, err := c.SendInformation(ctx, data)
+	received, err := c.SendInformation(ctx, dat)
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
 
-	var reintento int
-	if tipo == "retail" {
-		reintento = 3
-	} else { //pyme
-		reintento = 2
-	}
-
 	var try bool
+
 	var intento int
+	var Nintentos int
+
 	var IntentoFinal string
 	var enviado bool = false
 	var newEstado string = "En Bodega"
 
-	for intento = 0; intento < reintento; intento++ {
-		//hace cosas
+	var precio string = received.GetProductValue()
+	value, _ := strconv.Atoi(precio)
 
-		try = Envio()
-		newEstado = "En Camino"
+	if tipo == "retail" {
+		fmt.Print("\nRealizo pedido de retail")
 
-		if try {
-			IntentoFinal = "intento"
-			newEstado = "Recibido"
-			enviado = true
-			break
+		for intento = 0; intento < 3; intento++ {
+			//hace cosas
+
+			try = Envio()
+			newEstado = "En Camino"
+			fmt.Print("\nNuevo estado: En camino")
+
+			if try {
+				IntentoFinal = "intento"
+				newEstado = "Recibido"
+				fmt.Print("\nNuevo estado: Recibido")
+				enviado = true
+				break
+			}
+			// ACTUALIZAR ESTADO PAQUETE
+			data := &pb.StatusResponse{
+				TrackingCode: newEstado,
+			}
+			received, err := c.TrackingStatus(ctx, data)
+			if err != nil {
+				log.Fatalf("could not greet: %v%s", err, received)
+			}
+
+			// tiempo de espera despues de un envio
+			time.Sleep(time.Duration(intentoTime) * time.Second)
 		}
-	}
-	if !try && enviado == false {
-		IntentoFinal = "reintento"
-		newEstado = "No Recibido"
+		if !try && enviado == false {
+			IntentoFinal = "3"
+			newEstado = "No Recibido"
+			fmt.Print("\nNuevo estado: No Recibido")
+		}
+	} else { //pyme
+		fmt.Print("\nRealizo pedido de pyme")
+		if value < 10 {
+			Nintentos = 1 // 1 base + 0 extra
+		} else if value < 20 {
+			Nintentos = 2 // 1 base + 1 extra
+		} else { // mayor a 20
+			Nintentos = 3 // 1 base + 2 extra
+		}
+
+		for intento = 0; intento < Nintentos; intento++ {
+			//hace cosas
+
+			try = Envio()
+			fmt.Print("\nNuevo estado: En camino")
+			newEstado = "En Camino"
+
+			if try {
+				IntentoFinal = "intento"
+				newEstado = "Recibido"
+				fmt.Print("\nNuevo estado: Recibido")
+				enviado = true
+				break
+			}
+			// ACTUALIZAR ESTADO PAQUETE
+			data := &pb.StatusResponse{
+				TrackingCode: newEstado,
+			}
+			received, err := c.TrackingStatus(ctx, data)
+			if err != nil {
+				log.Fatalf("could not greet: %v%s", err, received)
+			}
+
+			// tiempo de espera despues de un envio
+			time.Sleep(time.Duration(intentoTime) * time.Second)
+		}
+		if !try && enviado == false {
+			IntentoFinal = strconv.Itoa(Nintentos)
+			newEstado = "No Recibido"
+			fmt.Print("\nNuevo estado: No Recibido")
+		}
+
 	}
 
+	received.Attempts = IntentoFinal
+	fmt.Print("\nNumero de intentos: %d", IntentoFinal)
+
+	orderUpdate := &pb.StatusResponse{
+		TrackingCode: received.OrderID,
+		Status:       newEstado,
+	}
+	m, err := c.TrackingStatus(ctx, orderUpdate)
+	if err != nil {
+		log.Fatalf("could not greet: %v%s", err, m)
+	}
+
+}
+
+func camion(c pb.GreeterClient, tipo string, intentoTime int, pedidoTime int) {
+	realizarEnvio(c, tipo, intentoTime)
+	// tiempo de espera despues de un envio
+	time.Sleep(time.Duration(pedidoTime) * time.Second)
+	realizarEnvio(c, tipo, intentoTime)
+}
+
+//gets input from user
+func getInput(x int) string {
+	if x == 1 {
+		fmt.Print("\nIngrese ID producto a ordenar: ")
+	} else if x == 3 {
+		fmt.Print("\nIngrese ID producto a Realizar Seguimiento: ")
+	} else {
+		fmt.Print("\nSeleccion: ")
+	}
+	var input string
+	fmt.Scanln(&input)
+	return input
 }
 
 func main() {
@@ -136,19 +210,26 @@ func main() {
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
 
-	//waiting Time
-	fmt.Println("\nIngrese Tiempo de Envio de Cada Paquete")
-	waitingTime, _ := strconv.Atoi(getInput(2))
-	fmt.Printf("\nTiempo: %d\n", waitingTime)
+	//waiting Time 1
+	fmt.Println("\nIngrese tiempo de envio entre cada paquete")
+	intentoTime, _ := strconv.Atoi(getInput(2))
+	fmt.Printf("\nTiempo: %d\n", intentoTime)
+
+	//waiting Time 2
+	fmt.Println("\nIngrese tiempo de envio entre cada pedido")
+	pedidoTime, _ := strconv.Atoi(getInput(2))
+	fmt.Printf("\nTiempo: %d\n", pedidoTime)
 
 	// Contact the server and print out its response.
 
 	for {
-		realizarEnvio(c, "retail")
+		go camion(c, "retail", intentoTime, pedidoTime)
 		time.Sleep(3 * time.Second)
-		realizarEnvio(c, "retail")
+
+		go camion(c, "retail", intentoTime, pedidoTime)
 		time.Sleep(3 * time.Second)
-		realizarEnvio(c, "pyme")
+
+		camion(c, "pyme", intentoTime, pedidoTime)
 		time.Sleep(3 * time.Second)
 	}
 }
