@@ -201,7 +201,7 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 			Attempts:     "", //Se modifica en la otra func, realizar envio,
 			Date:         getTime(),
 		}
-		fmt.Println(ret)
+		fmt.Println(itemI.tracking)
 		return ret, nil
 	}
 	var str string
