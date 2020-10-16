@@ -114,7 +114,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			defer cancel()
 			received, err := c.TrackingStatus(ctx, dat)
 			if err != nil {
-				log.Fatalf("could not greet: %v%s", err, received)
+				log.Fatalf("could not greet with retail: %v%s", err, received)
 			}
 
 			// tiempo de espera despues de un envio
@@ -158,7 +158,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			defer cancel()
 			received, err := c.TrackingStatus(ctx, dat)
 			if err != nil {
-				log.Fatalf("could not greet: %v%s", err, received)
+				log.Fatalf("could not greet with pyme: %v%s", err, received)
 			}
 
 			// tiempo de espera despues de un envio
@@ -184,7 +184,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	defer cancel()
 	m, err := c.TrackingStatus(ctx, orderUpdate)
 	if err != nil {
-		log.Fatalf("could not greet: %v%s", err, m)
+		log.Fatalf("could not greet at the end: %v%s", err, m)
 	}
 
 }
