@@ -106,14 +106,14 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				break
 			}
 			// ACTUALIZAR ESTADO PAQUETE
-			dat2 := &pb.StatusResponse{
+			dat := &pb.StatusResponse{
 				TrackingCode: newEstado,
 			}
-			ctx2, cancel2 := context.WithTimeout(context.Background(), time.Second)
-			defer cancel2()
-			received2, err2 := c.TrackingStatus(ctx2, dat2)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			received, err := c.TrackingStatus(ctx, dat)
 			if err != nil {
-				log.Fatalf("could not greet: %v%s", err2, received2)
+				log.Fatalf("could not greet: %v%s", err, received)
 			}
 
 			// tiempo de espera despues de un envio
@@ -149,14 +149,14 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				break
 			}
 			// ACTUALIZAR ESTADO PAQUETE
-			dat3 := &pb.StatusResponse{
+			dat := &pb.StatusResponse{
 				TrackingCode: newEstado,
 			}
-			ctx3, cancel3 := context.WithTimeout(context.Background(), time.Second)
-			defer cancel3()
-			received3, err3 := c.TrackingStatus(ctx3, dat3)
-			if err3 != nil {
-				log.Fatalf("could not greet: %v%s", err3, received3)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			received, err := c.TrackingStatus(ctx, dat)
+			if err != nil {
+				log.Fatalf("could not greet: %v%s", err, received)
 			}
 
 			// tiempo de espera despues de un envio
@@ -174,15 +174,15 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	fmt.Printf("\nNumero de intentos: %s", IntentoFinal)
 
 	// agregar numero de intentos
-	orderUpdate := &pb.StatusResponse{
+	orderUpdate := pb.StatusResponse{
 		TrackingCode: received.OrderID,
 		Status:       newEstado,
 	}
-	ctx4, cancel4 := context.WithTimeout(context.Background(), time.Second)
-	defer cancel4()
-	m, err4 := c.TrackingStatus(ctx4, orderUpdate)
+	ctx, cancel := context.WithTimeout(context.Background(), &time.Second)
+	defer cancel()
+	m, err4 := c.TrackingStatus(ctx, orderUpdate)
 	if err != nil {
-		log.Fatalf("could not greet: %v%s", err4, m)
+		log.Fatalf("could not greet: %v%s", err, m)
 	}
 
 }
