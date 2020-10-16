@@ -173,7 +173,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	}
 
 	received.Attempts = IntentoFinal
-	fmt.Printf("\nNumero de intentos: %s", IntentoFinal)
+	fmt.Printf("\nNumero de intentos: %s\n", IntentoFinal)
 
 	// agregar numero de intentos
 	orderUpdate := &pb.StatusResponse{
@@ -184,7 +184,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	defer cancel()
 	m, err := c.TrackingStatus(ctx, orderUpdate)
 	if err != nil {
-		log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m.Message)
+		log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m)
 	}
 
 }
