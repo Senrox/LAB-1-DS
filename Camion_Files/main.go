@@ -73,7 +73,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	defer cancel()
 	received, err := c.SendInformation(ctx, dat)
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("\ncould not greet: %v", err)
 	}
 
 	var try bool
@@ -114,7 +114,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			defer cancel()
 			received, err := c.TrackingStatus(ctx, dat)
 			if err != nil {
-				log.Fatalf("could not greet with retail: %v%s", err, received)
+				log.Fatalf("\ncould not greet with retail: %v%s", err, received)
 			}
 
 			// tiempo de espera despues de un envio
@@ -158,7 +158,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			defer cancel()
 			received, err := c.TrackingStatus(ctx, dat)
 			if err != nil {
-				log.Fatalf("could not greet with pyme: %v%s", err, received)
+				log.Fatalf("\ncould not greet with pyme: %v%s", err, received)
 			}
 
 			// tiempo de espera despues de un envio
@@ -184,7 +184,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 	defer cancel()
 	m, err := c.TrackingStatus(ctx, orderUpdate)
 	if err != nil {
-		log.Fatalf("could not greet at the end: %v%s", err, m)
+		log.Fatalf("\ncould not greet at the end: %v%s", err, m)
 	}
 
 }
@@ -214,7 +214,7 @@ func main() {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		log.Fatalf("\ndid not connect: %v", err)
 	}
 	defer conn.Close()
 	c := pb.NewGreeterClient(conn)
