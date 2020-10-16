@@ -133,7 +133,8 @@ func getInput(x int) string {
 *  c es la conexion
  */
 func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
-	for {
+	var i int
+	for i = 0; i < p.Len(); i++ {
 		//TODO ejecutar el for hasta el largo de la lista
 		if p != nil {
 			// waiting time
@@ -182,6 +183,7 @@ func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
 			fmt.Println("No hay mas ordenes que enviar.")
 		}
 	}
+	fmt.Println("No hay mas ordenes que enviar.")
 }
 
 func main() {
