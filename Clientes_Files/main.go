@@ -136,7 +136,7 @@ func hacerOrden(p *list.List, c pb.GreeterClient, waitingTime int) {
 
 	for {
 		//TODO ejecutar el for hasta el largo de la lista
-		if p == nil {
+		if p.Front() == nil {
 			fmt.Println("No hay mas ordenes que enviar.")
 			break
 
