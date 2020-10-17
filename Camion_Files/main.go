@@ -222,9 +222,9 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int, f *os.File)
 
 func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime int) {
 	str := fmt.Sprintf("registry_truck_%s_%d.csv", tipo, n)
-	f, err := os.Create(str)
+	f, err := os.Open(str)
 	check(err)
-
+	toFile := "OrderID,ProductValue,Origen,Destino,Intentos,hora\n"
 	_, err2 := f.WriteString(str)
 	check(err2)
 
