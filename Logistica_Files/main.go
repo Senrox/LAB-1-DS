@@ -244,7 +244,7 @@ func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb
 func (s *server) TrackingStatusUpdate(ctx context.Context, in *pb.StatusResponse) (*pb.MsgGenerico, error) {
 
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
-	ProductDatabaseByTracking[in.GetTrackingCode()].atts = in.GetAttemps()
+	ProductDatabaseByTracking[in.GetTrackingCode()].atts = in.GetAttempts()
 
 	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
 	log.Printf("\n\tTracking Code: %s\n", in.GetTrackingCode())
@@ -259,7 +259,7 @@ func (s *server) TrackingStatusUpdate(ctx context.Context, in *pb.StatusResponse
 func (s *server) TrackingStatusFinal(ctx context.Context, in *pb.StatusResponse) (*pb.HelloReply, error) {
 
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
-	ProductDatabaseByTracking[in.GetTrackingCode()].atts = in.GetAttemps()
+	ProductDatabaseByTracking[in.GetTrackingCode()].atts = in.GetAttempts()
 
 	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
 	log.Printf("\n\tTracking Code: %s\n", in.GetTrackingCode())
