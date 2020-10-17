@@ -345,7 +345,7 @@ func enviarAfinanzas() {
 			front := ordenesCompletas.Front()
 			code = string(front.Value.(string))
 
-			data = ProductDatabaseByTracking[code]
+			data := ProductDatabaseByTracking[code]
 			// envia info
 			//Creacion de msg a publicar
 			body := "{name:arvind, message:hello}"
