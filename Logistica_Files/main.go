@@ -60,6 +60,19 @@ type Items struct {
 	atts        string
 }
 
+type Items2 struct {
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Order_type  string `json:"order_type"`
+	Order_dest  string `json:"order_src"`
+	Order_src   string `json:"order_dest"`
+	Order_value string `json:"order_value"`
+	Tracking    string `json:"tracking"`
+	Status      string `json:"status"`
+	Timestamp   string `json:"timestamp"`
+	Atts        string `json:"atts"`
+}
+
 type ItemStatus struct {
 	trackingCode string
 	status       string
@@ -355,7 +368,7 @@ func enviarAfinanzas() {
 			front := ordenesCompletas.Front()
 			code = string(front.Value.(string))
 
-			data := ProductDatabaseByTracking[code]
+			item := ProductDatabaseByTracking[code]
 			/*
 				type Items struct {
 					id          string
@@ -367,20 +380,22 @@ func enviarAfinanzas() {
 					tracking    string
 					status      string
 					timestamp   string
+					atts 		string intentos
+				}
+
+				item2 := Items2{Id: item.id, Name: item.name, Order_type: item.order_type, Order_dest: item.order_dest, Order_src: item.order_src,
+					Order_value: item.order_value, Tracking: item.tracking, Status: item.status, Timestamp: item.timestamp, Atts: item.atts}
+
+					byteArray, err := json.Marshal(item2)
+					if err != nil {
+						fmt.Println(err)
 				}
 			*/
 
-			//
-			//
-			fmt.Println("\n<--------------- DATA --------------->")
-			fmt.Println(data)
-			fmt.Println("\n<--------------- DATA --------------->")
-			//
-			//
-
+			body := fmt.Sprintf("{id:%s,value:%s,status:%s,orderId:%s,attempts:%s}", item.id, item.order_value, item.status, item.tracking, item.atts)
 			// envia info
 			//Creacion de msg a publicar
-			body := "{name:arvind, message:hello}"
+			//body := "{id:" + xasxcsa + "message:hello}"
 			err = ch.Publish(
 				"",     // exchange
 				q.Name, // routing key
