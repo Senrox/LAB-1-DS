@@ -340,8 +340,11 @@ func enviarAfinanzas() {
 	failOnError(err, "Failed to declare a queue")
 	var code string
 	for {
-		if ordenesCompletas.front() != nil {
-			code = ordenesCompletas.Front().Value
+		if ordenesCompletas.Front() != nil {
+
+			front := ordenesCompletas.Front()
+			code = string(front.Value.(string))
+
 			data = ProductDatabaseByTracking[code]
 			// envia info
 			//Creacion de msg a publicar
@@ -358,7 +361,7 @@ func enviarAfinanzas() {
 			log.Printf(" [x] Sent %s", body)
 			failOnError(err, "Failed to publish a message")
 
-			ordenesCompletas.Remove(code)
+			ordenesCompletas.Remove(front)
 		} else {
 			fmt.Print("No hay ordenes completadas")
 		}
