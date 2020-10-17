@@ -81,6 +81,7 @@ message msgGenerico {
 message StatusResponse{
   string trackingCode = 1;
   string status = 2;
+  string attemps = 3;
 }
 
 message Information {

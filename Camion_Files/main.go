@@ -47,6 +47,7 @@ type Items struct {
 	dest  string
 	reply string
 	date  string
+	atts  string
 }
 
 // Envio retorna si el envio se hace o no se hace
@@ -187,6 +188,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 		orderUpdate := &pb.StatusResponse{
 			TrackingCode: received.OrderID,
 			Status:       newEstado,
+			Attempts:     IntentoFinal,
 		}
 		ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
