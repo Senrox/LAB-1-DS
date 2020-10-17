@@ -88,21 +88,26 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 
 		var precio string = received.GetProductValue()
 		value, _ := strconv.Atoi(precio)
+		received.GetOrderID()
+
+		fmt.Println("Orden Code: %s", received.GetOrderID())
+		fmt.Println("Estado: En Bodega")
+		fmt.Println("Realizo pedido de retail")
+		fmt.Println("Estado: En camino")
+		newEstado = "En Camino"
 
 		if tipo == "retail" {
-			fmt.Print("\nRealizo pedido de retail")
 
 			for intento = 0; intento < 3; intento++ {
 				//hace cosas
 
 				try = Envio()
-				newEstado = "En Camino"
-				fmt.Print("\nNuevo estado: En camino")
-
+				fmt.Println("Intento enviar")
 				if try {
 					IntentoFinal = strconv.Itoa(intento)
 					newEstado = "Recibido"
-					fmt.Print("\nNuevo estado: Recibido")
+					fmt.Println("Envio Realizado")
+					fmt.Println("Nuevo estado: Recibido")
 					enviado = true
 					break
 				}
@@ -124,7 +129,8 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			if !try && enviado == false {
 				IntentoFinal = "3"
 				newEstado = "No Recibido"
-				fmt.Print("\nNuevo estado: No Recibido")
+				fmt.Println("Fallo al enviar")
+				fmt.Println("Estado: No Recibido")
 			}
 		} else { //pyme
 			fmt.Print("\nRealizo pedido de pyme")
@@ -140,13 +146,12 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				//hace cosas
 
 				try = Envio()
-				fmt.Print("\nNuevo estado: En camino")
-				newEstado = "En Camino"
 
 				if try {
 					IntentoFinal = strconv.Itoa(intento)
 					newEstado = "Recibido"
-					fmt.Print("\nNuevo estado: Recibido")
+					fmt.Println("Envio Realizado")
+					fmt.Println("Nuevo estado: Recibido")
 					enviado = true
 					break
 				}
@@ -168,7 +173,8 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			if !try && enviado == false {
 				IntentoFinal = strconv.Itoa(Nintentos)
 				newEstado = "No Recibido"
-				fmt.Print("\nNuevo estado: No Recibido")
+				fmt.Println("Fallo al enviar")
+				fmt.Println("Estado: No Recibido")
 			}
 
 		}
@@ -191,8 +197,8 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 		// aca
 		//enviarAfinanzas
 		/*
-		camion -> logistica
-		logistica : enviarStatus(final)
+			camion -> logistica
+			logistica : enviarStatus(final)
 		*/
 	} else {
 		fmt.Println("\nxNo hay ordenes pendientes")
