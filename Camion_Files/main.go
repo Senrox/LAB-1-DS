@@ -222,6 +222,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int, f *os.File)
 
 func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime int) {
 	str := fmt.Sprintf("registry_truck_%s_%d.csv", tipo, n)
+
 	f, err := os.Open(str)
 	check(err)
 	toFile := "OrderID,ProductValue,Origen,Destino,Intentos,hora\n"
@@ -229,10 +230,19 @@ func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime 
 	check(err2)
 
 	realizarEnvio(c, tipo, intentoTime, f)
-	// tiempo de espera despues de un envio
-	time.Sleep(time.Duration(pedidoTime) * time.Second)
-	realizarEnvio(c, tipo, intentoTime, f)
+
 	defer f.Close()
+
+	// tiempo de espera despues de un envio
+
+	time.Sleep(time.Duration(pedidoTime) * time.Second)
+
+	f2, err3 := os.Open(str)
+	check(err3)
+
+	realizarEnvio(c, tipo, intentoTime, f2)
+	defer f2.Close()
+
 }
 
 //gets input from user

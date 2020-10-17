@@ -57,6 +57,12 @@ func SetupCloseHandler(gananciasTotal float64, perdidasTotal float64, enviosTota
 	}()
 }
 
+var gananciasTotal float64 = 0.0
+var perdidasTotal float64 = 0.0
+var enviosEntregados int = 0
+var enviosNoEntregados int = 0
+var enviosTotales int = 0
+
 func main() {
 	// Inicaimos conexion
 	conn, err := amqp.Dial("amqp://test:test@10.6.40.169:5672/")
@@ -104,12 +110,6 @@ func main() {
 		Atts        string `json:"atts"`
 		}
 	*/
-	var gananciasTotal float64 = 0.0
-	var perdidasTotal float64 = 0.0
-
-	var enviosEntregados int = 0
-	var enviosNoEntregados int = 0
-	var enviosTotales int = 0
 
 	go func() {
 		for d := range msgs {
