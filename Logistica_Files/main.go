@@ -375,6 +375,8 @@ func main() {
 
 	go camiones()
 
+	go enviarAfinanzas()
+
 	clientes()
 
 }
