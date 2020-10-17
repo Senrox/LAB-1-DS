@@ -210,7 +210,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int, f *os.File)
 		if newEstado != "Envio Realizado" {
 			t = "0"
 		}
-		toFile := fmt.Sprintf("%s,%s,%s,%s,%s,%s\n", received.OrderId, received.ProductValue, received.Src, received.Dest, IntentoFinal, t)
+		toFile := fmt.Sprintf("%s,%s,%s,%s,%s,%s\n", received.OrderID, received.ProductValue, received.Src, received.Dest, IntentoFinal, t)
 		_, err = f.WriteString(toFile)
 		check(err)
 
