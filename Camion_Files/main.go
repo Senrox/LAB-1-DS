@@ -225,7 +225,7 @@ func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime 
 	f, err := os.Open(str)
 	check(err)
 	toFile := "OrderID,ProductValue,Origen,Destino,Intentos,hora\n"
-	_, err2 := f.WriteString(str)
+	_, err2 := f.WriteString(toFile)
 	check(err2)
 
 	realizarEnvio(c, tipo, intentoTime, f)
