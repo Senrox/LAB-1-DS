@@ -144,7 +144,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				Nintentos = 3 // 1 base + 2 extra
 			}
 
-			for intento = 0; intento < Nintentos; intento++ {
+			for intento = 1; intento < Nintentos+1; intento++ {
 				//hace cosas
 
 				try = Envio()
