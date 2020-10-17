@@ -5,7 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	"github.com/streadway/amqp"
 )
@@ -22,9 +26,11 @@ type Items2 struct {
 type Balance struct {
 	Id       string
 	Tracking string
-	Atts     string
-	ganancia string
-	perdida  string
+	tipo     string
+	Atts     float64
+	total    float64
+	ganancia float64
+	perdida  float64
 }
 
 func failOnError(err error, msg string) {
@@ -36,6 +42,18 @@ func failOnError(err error, msg string) {
 
 func guardar() {
 	fmt.Print("xd")
+}
+
+func SetupCloseHandler(gananciasTotal float64, perdidasTotal float64, enviosTotales int, enviosNoEntregados int, enviosEntregados int) {
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		fmt.Println("\r- Ctrl+C pressed in Terminal")
+		fmt.Printf("\nBALANCE GENERAL:\n")
+		fmt.Printf("GANANCIAS: %f, PERDIDAS: %f, ENVIOS TOTALES: %d, ENVIOS NO ENTREGADOS: %d, ENVIOS ENTREGADOS: %d\n", gananciasTotal, perdidasTotal, enviosTotales, enviosNoEntregados, enviosEntregados)
+		os.Exit(0)
+	}()
 }
 
 func main() {
@@ -85,10 +103,12 @@ func main() {
 		Atts        string `json:"atts"`
 		}
 	*/
-	var gananciasTotal int = 0
-	var perdidasTotal int = 0
-	var enviosCompletados int = 0
-	var enviosFallidos int = 0
+	var gananciasTotal float64 = 0.0
+	var perdidasTotal float64 = 0.0
+
+	var enviosEntregados int = 0
+	var enviosNoEntregados int = 0
+	var enviosTotales int = 0
 
 	go func() {
 		for d := range msgs {
@@ -103,37 +123,61 @@ func main() {
 
 			var balance Balance
 
+			//valor del producto
+			valorProducto, err := strconv.ParseFloat(reading.Order_value, 64)
+
+			//intentos del producto
+			intentos, err := strconv.ParseFloat(reading.Atts, 64)
+
+			//pedidas del producto
+			var perdidas float64 = 10 * float64(intentos-1.0)
+
+			// valor a ganar aka BALANCE
+			var total float64
+			total = math.Abs(valorProducto - perdidas)
+
+			//Asignacion base
 			balance.Id = reading.Id
 			balance.Tracking = reading.Tracking
-			balance.Atts = reading.Atts
-
-			intentos, err := strconv.Atoi(reading.Atts)
-			tempGanancias, err := strconv.Atoi(reading.Order_value)
-
-			var tempPerdidas int = 10 * intentos
-			var ingreso int
+			balance.tipo = reading.Order_type
+			balance.Atts = intentos
 
 			if reading.Status == "Recibido" {
-				enviosCompletados++
-				ingreso = tempGanancias - tempPerdidas
-				if ingreso > 0 {
-					gananciasTotal = gananciasTotal + ingreso
-					balance.ganancia = strconv.Itoa(ingreso)
-					balance.perdida = "0"
+				balance.total = total
+				balance.ganancia = valorProducto
+				balance.perdida = perdidas
+				enviosEntregados++
+			} else {
+				//No Recibido
+				if reading.Order_type == "Normal" {
+					// Normal
+					balance.total = total
+					balance.ganancia = 0.0
+					balance.perdida = perdidas
+				} else if reading.Order_type == "prioritario" {
+					//Prioritario
+					newValue := valorProducto * 0.3
+
+					balance.total = math.Abs(newValue - perdidas)
+					balance.ganancia = newValue
+					balance.perdida = perdidas
 				} else {
-					perdidasTotal = perdidasTotal + ingreso
-					balance.ganancia = "0"
-					balance.perdida = strconv.Itoa(ingreso)
+					//Retail
+					balance.total = total
+					balance.ganancia = valorProducto
+					balance.perdida = valorProducto
 				}
-
-			} else { //No Recibido
-				if reading.Order_type == "0"
+				enviosNoEntregados++
 			}
-
-			//fmt.Printf("%s", reading.Id)
+			gananciasTotal = gananciasTotal + balance.ganancia
+			perdidasTotal = perdidasTotal + balance.perdida
+			fmt.Println(balance)
+			// Guardar Registro PAPOPE
+			enviosTotales++
 		}
 	}()
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	SetupCloseHandler(gananciasTotal, perdidasTotal, enviosTotales, enviosNoEntregados, enviosEntregados)
 	<-forever
 }

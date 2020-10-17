@@ -25,6 +25,7 @@ import (
 	pb "helloworld"
 	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"time"
 
@@ -62,7 +63,15 @@ func Envio() bool {
 	return false
 }
 
-func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
+//funcion que retorna el tiempo actual
+func getTime() string {
+	t := time.Now()
+	return fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d",
+		t.Year(), t.Month(), t.Day(),
+		t.Hour(), t.Minute(), t.Second())
+}
+
+func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int, f file) {
 
 	// esto dentro del codigo de camiones
 
@@ -197,17 +206,32 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m)
 		}
 
+		t := getTime()
+		if newEstado != "Envio Realizado" {
+			t = "0"
+		}
+		toFile := fmt.Sprintf("%s,%s,%s,%s,%s,%s\n", received.Id, item.order_value, received.order_src, received.order_dest, IntentoFinal, t)
+		_, err := f.WriteString(toFile)
+		check(err)
+
 	} else {
 		fmt.Println("\nNo hay ordenes pendientes")
 	}
 
 }
 
-func camion(c pb.GreeterClient, tipo string, intentoTime int, pedidoTime int) {
-	realizarEnvio(c, tipo, intentoTime)
+func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime int) {
+	str := fmt.Sprintf("registry_truck_%s_%d.csv", tipo, n)
+	f, _ := os.Create(str)
+	check(err)
+
+	_, err := f.WriteString(toFile)
+	check(err)
+
+	realizarEnvio(c, tipo, intentoTime, f)
 	// tiempo de espera despues de un envio
 	time.Sleep(time.Duration(pedidoTime) * time.Second)
-	realizarEnvio(c, tipo, intentoTime)
+	realizarEnvio(c, tipo, intentoTime, f)
 }
 
 //gets input from user
@@ -222,6 +246,12 @@ func getInput(x int) string {
 	var input string
 	fmt.Scanln(&input)
 	return input
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
 
 func main() {
@@ -246,13 +276,13 @@ func main() {
 	// Contact the server and print out its response.
 
 	for {
-		go camion(c, "retail", intentoTime, pedidoTime)
+		go camion(c, 1, "retail", intentoTime, pedidoTime)
 		time.Sleep(3 * time.Second)
 
-		go camion(c, "retail", intentoTime, pedidoTime)
+		go camion(c, 2, "retail", intentoTime, pedidoTime)
 		time.Sleep(3 * time.Second)
 
-		camion(c, "pyme", intentoTime, pedidoTime)
+		camion(c, 1, "pyme", intentoTime, pedidoTime)
 		time.Sleep(3 * time.Second)
 	}
 }
