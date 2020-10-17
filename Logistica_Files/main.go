@@ -346,6 +346,7 @@ func enviarAfinanzas() {
 			code = string(front.Value.(string))
 
 			data := ProductDatabaseByTracking[code]
+			fmt.Println(data)
 			// envia info
 			//Creacion de msg a publicar
 			body := "{name:arvind, message:hello}"
