@@ -338,7 +338,7 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func enviarAfinanzas(f file) {
+func enviarAfinanzas(f *os.File) {
 	// se crea conecxion
 	conn, err := amqp.Dial("amqp://test:test@10.6.40.169:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -407,7 +407,7 @@ func enviarAfinanzas(f file) {
 			toFile := fmt.Sprintf("%s,%s,%s,%s,%s,%s,%s,%s\n", getTime(), item.id, item.order_type, item.name,
 				item.order_value, item.order_src, item.order_dest, item.tracking)
 
-			_, err := f.WriteString(toFile)
+			_, err = f.WriteString(toFile)
 			check(err)
 
 			ordenesCompletas.Remove(front)
@@ -430,7 +430,7 @@ func check(e error) {
 
 func main() {
 
-	f, _ := os.Create("registry.csv")
+	f, err := os.Create("registry.csv")
 	check(err)
 
 	ProductDatabaseByTracking = make(map[string]*Items)
