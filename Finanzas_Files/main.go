@@ -26,11 +26,11 @@ func main() {
 
 	q, err := ch.QueueDeclare(
 		"hello-queue", // name
-		false,   // durable
-		false,   // delete when usused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
+		false,         // durable
+		false,         // delete when usused
+		false,         // exclusive
+		false,         // no-wait
+		nil,           // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -54,4 +54,4 @@ func main() {
 	}()
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	
+}
