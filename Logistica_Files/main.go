@@ -22,6 +22,7 @@ package main
 import (
 	"container/list"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -62,14 +63,10 @@ type Items struct {
 
 type Items2 struct {
 	Id          string `json:"id"`
-	Name        string `json:"name"`
 	Order_type  string `json:"order_type"`
-	Order_dest  string `json:"order_src"`
-	Order_src   string `json:"order_dest"`
 	Order_value string `json:"order_value"`
 	Tracking    string `json:"tracking"`
 	Status      string `json:"status"`
-	Timestamp   string `json:"timestamp"`
 	Atts        string `json:"atts"`
 }
 
@@ -382,20 +379,18 @@ func enviarAfinanzas() {
 					timestamp   string
 					atts 		string intentos
 				}
-
-				item2 := Items2{Id: item.id, Name: item.name, Order_type: item.order_type, Order_dest: item.order_dest, Order_src: item.order_src,
-					Order_value: item.order_value, Tracking: item.tracking, Status: item.status, Timestamp: item.timestamp, Atts: item.atts}
-
-					byteArray, err := json.Marshal(item2)
-					if err != nil {
-						fmt.Println(err)
-				}
 			*/
 
-			body := fmt.Sprintf("{id:%s,value:%s,status:%s,orderId:%s,attempts:%s}", item.id, item.order_value, item.status, item.tracking, item.atts)
+			item2 := Items2{Id: item.id, Order_type: item.order_type, Order_value: item.order_value, Tracking: item.tracking, Status: item.status, Atts: item.atts}
+
+			byteArray, err := json.Marshal(item2)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			//body := fmt.Sprintf("{id:%s,value:%s,status:%s,orderId:%s,attempts:%s}", item.id, item.order_value, item.status, item.tracking, item.atts)
 			// envia info
 			//Creacion de msg a publicar
-			//body := "{id:" + xasxcsa + "message:hello}"
 			err = ch.Publish(
 				"",     // exchange
 				q.Name, // routing key
@@ -403,9 +398,9 @@ func enviarAfinanzas() {
 				false,  // immediate
 				amqp.Publishing{
 					ContentType: "application/json",
-					Body:        []byte(body),
+					Body:        byteArray,
 				})
-			log.Printf(" [x] Sent %s", body)
+			log.Printf(" [x] Sent %s", byteArray)
 			failOnError(err, "Failed to publish a message")
 
 			ordenesCompletas.Remove(front)
