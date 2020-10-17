@@ -44,6 +44,7 @@ func guardar() {
 	fmt.Print("xd")
 }
 
+//SetupCloseHandler, se ocupa de mostrar todo cuando hay ctr+c
 func SetupCloseHandler(gananciasTotal float64, perdidasTotal float64, enviosTotales int, enviosNoEntregados int, enviosEntregados int) {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -116,7 +117,7 @@ func main() {
 
 			var reading Items2
 
-			err = json.Unmarshal([]byte(d), &reading)
+			err = json.Unmarshal([]byte(d.Body), &reading)
 			if err != nil {
 				log.Fatalf("oh shoiit: %v", err)
 			}
@@ -124,10 +125,10 @@ func main() {
 			var balance Balance
 
 			//valor del producto
-			valorProducto, err := strconv.ParseFloat(reading.Order_value, 64)
+			valorProducto, _ := strconv.ParseFloat(reading.Order_value, 64)
 
 			//intentos del producto
-			intentos, err := strconv.ParseFloat(reading.Atts, 64)
+			intentos, _ := strconv.ParseFloat(reading.Atts, 64)
 
 			//pedidas del producto
 			var perdidas float64 = 10 * float64(intentos-1.0)
