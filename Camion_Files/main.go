@@ -100,7 +100,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 		if tipo == "retail" {
 
 			fmt.Println("Realizo pedido de retail")
-			for intento = 0; intento < 3; intento++ {
+			for intento = 1; intento < 4; intento++ {
 				//hace cosas
 
 				try = Envio()
