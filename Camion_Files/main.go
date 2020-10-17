@@ -232,6 +232,7 @@ func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime 
 	// tiempo de espera despues de un envio
 	time.Sleep(time.Duration(pedidoTime) * time.Second)
 	realizarEnvio(c, tipo, intentoTime, f)
+	defer f.Close()
 }
 
 //gets input from user
