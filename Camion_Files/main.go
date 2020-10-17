@@ -188,7 +188,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m)
 		}
 	} else {
-		fmt.Println("\nNo hay ordenes pendientes")
+		fmt.Println("\nxNo hay ordenes pendientes")
 	}
 
 }
