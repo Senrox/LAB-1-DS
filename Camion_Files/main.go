@@ -225,8 +225,8 @@ func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime 
 	f, err := os.Create(str)
 	check(err)
 
-	_, err := f.WriteString(str)
-	check(err)
+	_, err2 := f.WriteString(str)
+	check(err2)
 
 	realizarEnvio(c, tipo, intentoTime, f)
 	// tiempo de espera despues de un envio
