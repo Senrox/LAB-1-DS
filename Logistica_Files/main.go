@@ -92,7 +92,8 @@ var trackingCode int = 1000
 func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderConfirmation, error) {
 
 	fmt.Println("\n<--------------- NEW ORDER COMES IN!!! --------------->")
-	log.Printf("ORDER INFORMATON:")
+	log.Printf("\tORDER INFORMATON:")
+	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 
 	trackingCode++
 
@@ -101,7 +102,7 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 	// timestamp id-paquete tipo nombre valor origen destino seguimiento
 	//fmt.Printf("TIMESTAMP | ORDER ID | TYPE | NAME | VALUE | SOURCE | DEST | TRACKING CODE")
 	fmt.Println()
-	log.Printf("%s %s %s %s %s %s %d\n",
+	log.Printf("\t%s %s %s %s %s %s %d\n",
 		in.GetOrderID(), in.GetProductType(), in.GetProductName(),
 		in.GetProductValue(), in.GetSrc(), in.GetDest(), trackingCode)
 
@@ -134,7 +135,8 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 
 	tipoCamion := in.GetR()
-	fmt.Printf("Tipo Camion: %s\n", tipoCamion)
+	fmt.Printf("\n\tTipo Camion: %s\n", tipoCamion)
+	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 
 	/*
 		front := l.Front()
@@ -162,7 +164,10 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 			colaPrioritario.Remove(front)
 
 		} else {
-			fmt.Print("No hay entregas para realizar")
+			fmt.Println("\n<--------------- SYSTEM UPDATE --------------->")
+			fmt.Print("\n\tNo hay entregas para realizar")
+			fmt.Println("\n<--------------- SYSTEM UPDATE --------------->")
+
 			flag = false
 		}
 	} else {
@@ -179,7 +184,9 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 			colaNormal.Remove(front)
 
 		} else {
-			fmt.Print("No hay entregas para realizar")
+			fmt.Println("\n<--------------- SYSTEM UPDATE --------------->")
+			fmt.Print("\n\tNo hay entregas para realizar\n")
+			fmt.Println("\n<--------------- SYSTEM UPDATE --------------->")
 			flag = false
 		}
 	}
@@ -224,8 +231,8 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb.Status, error) {
 
 	fmt.Println("\n<--------------- STATUS REQUEST --------------->")
-	fmt.Println()
-	log.Printf("STATUS INFORMATON: %s\n", in.GetTrackingCode())
+	log.Printf("\n\tSTATUS INFORMATON: %s\n", in.GetTrackingCode())
+	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
 
 	//Codigo de respuesta
 	return &pb.Status{Message: ProductDatabaseByTracking[in.GetTrackingCode()].status}, nil
@@ -238,9 +245,9 @@ func (s *server) TrackingStatusUpdate(ctx context.Context, in *pb.StatusResponse
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
 
 	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
-	fmt.Println()
-	log.Printf("Tracking Code: %s\n", in.GetTrackingCode())
-	log.Printf("STATUS INFORMATON: %s\n", in.GetStatus())
+	log.Printf("\n\tTracking Code: %s\n", in.GetTrackingCode())
+	log.Printf("\n\tSTATUS INFORMATON: %s\n", in.GetStatus())
+	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
 
 	//Codigo de respuesta
 	var str string
@@ -252,9 +259,9 @@ func (s *server) TrackingStatusFinal(ctx context.Context, in *pb.StatusResponse)
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
 
 	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
-	fmt.Println()
-	log.Printf("Tracking Code: %s\n", in.GetTrackingCode())
-	log.Printf("STATUS INFORMATON: %s\n", in.GetStatus())
+	log.Printf("\n\tTracking Code: %s\n", in.GetTrackingCode())
+	log.Printf("\n\tSTATUS INFORMATON: %s\n", in.GetStatus())
+	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
 
 	ordenesCompletas.PushBack(in.GetTrackingCode())
 
@@ -284,7 +291,7 @@ func storeInList(item Items) {
 
 func clientes() {
 	//--------------------------------------------------------------> Server1
-	fmt.Print("Waitin for my CLientes amigos")
+	fmt.Print("Waitin for my Clientes...")
 	lis, err := net.Listen("tcp", portClientes)
 	if err != nil {
 		log.Fatalf("failed to listen1: %v", err)
@@ -298,7 +305,7 @@ func clientes() {
 
 func camiones() {
 	//--------------------------------------------------------------> Server1
-	fmt.Print("Waitin for my trucks, I'm the mothafucka T.R.U.C.K.")
+	fmt.Print("Waitin for Trucks...")
 	lis, err := net.Listen("tcp", portCamiones)
 	if err != nil {
 		log.Fatalf("failed to listen2: %v", err)
@@ -365,7 +372,10 @@ func enviarAfinanzas() {
 			ordenesCompletas.Remove(front)
 		} else {
 			time.Sleep(10 * time.Second)
-			fmt.Println("No hay ordenes completadas")
+			fmt.Println("\n<--------------- SYSTEM UPDATE --------------->")
+			fmt.Print("\n\tNo hay ordenes completadas")
+			fmt.Println("\n<--------------- SYSTEM UPDATE --------------->")
+
 		}
 	}
 }

@@ -92,12 +92,13 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 
 		fmt.Println("Orden Code: %s", received.GetOrderID())
 		fmt.Println("Estado: En Bodega")
-		fmt.Println("Realizo pedido de retail")
+		fmt.Println("Saliendo!!!")
 		fmt.Println("Estado: En camino")
 		newEstado = "En Camino"
 
 		if tipo == "retail" {
 
+			fmt.Println("Realizo pedido de retail")
 			for intento = 0; intento < 3; intento++ {
 				//hace cosas
 
@@ -194,14 +195,8 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 			log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m)
 		}
 
-		// aca
-		//enviarAfinanzas
-		/*
-			camion -> logistica
-			logistica : enviarStatus(final)
-		*/
 	} else {
-		fmt.Println("\nxNo hay ordenes pendientes")
+		fmt.Println("\nNo hay ordenes pendientes")
 	}
 
 }
