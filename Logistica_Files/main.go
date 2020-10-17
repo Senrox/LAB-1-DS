@@ -364,7 +364,8 @@ func enviarAfinanzas() {
 
 			ordenesCompletas.Remove(front)
 		} else {
-			fmt.Print("No hay ordenes completadas")
+			time.Sleep(10 * time.Second)
+			fmt.Println("No hay ordenes completadas")
 		}
 	}
 }
