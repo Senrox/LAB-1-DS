@@ -1,4 +1,4 @@
-// reciver
+// reciver / consummer
 package main
 
 import (
@@ -16,14 +16,17 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
+	// Inicaimos conexion
 	conn, err := amqp.Dial("amqp://test:test@10.6.40.169:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
+	// se abre el canal
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
+	// creacion de cola
 	q, err := ch.QueueDeclare(
 		"hello-queue", // name
 		false,         // durable
@@ -34,6 +37,7 @@ func main() {
 	)
 	failOnError(err, "Failed to declare a queue")
 
+	//se reciven msg del la cola
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
@@ -45,6 +49,7 @@ func main() {
 	)
 	failOnError(err, "Failed to register a consumer")
 
+	//bloquea la ejecucion del main.go hasta que recibe un valor
 	forever := make(chan bool)
 
 	go func() {

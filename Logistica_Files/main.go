@@ -30,6 +30,7 @@ import (
 
 	pb "helloworld"
 
+	"github.com/streadway/amqp"
 	"google.golang.org/grpc"
 	//pb "google.golang.org/grpc/examples/helloworld/helloworld"
 )
@@ -66,6 +67,7 @@ type ItemStatus struct {
 // ProductDatabaseByTracking - base de datos de tracking
 var ProductDatabaseByTracking map[string]*Items
 
+var ordenesCompletas = list.New()
 var colaPrioritario = list.New()
 var colaNormal = list.New()
 var colaRetail = list.New()
@@ -231,7 +233,7 @@ func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb
 
 // actualizacion de estados
 // camoines <-> servidor
-func (s *server) TrackingStatus(ctx context.Context, in *pb.StatusResponse) (*pb.MsgGenerico, error) {
+func (s *server) TrackingStatusUpdate(ctx context.Context, in *pb.StatusResponse) (*pb.MsgGenerico, error) {
 
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
 
@@ -239,6 +241,22 @@ func (s *server) TrackingStatus(ctx context.Context, in *pb.StatusResponse) (*pb
 	fmt.Println()
 	log.Printf("Tracking Code: %s\n", in.GetTrackingCode())
 	log.Printf("STATUS INFORMATON: %s\n", in.GetStatus())
+
+	//Codigo de respuesta
+	var str string
+	return &pb.MsgGenerico{Message: str}, nil
+}
+
+func (s *server) TrackingStatusFinal(ctx context.Context, in *pb.StatusResponse) (*pb.HelloReply, error) {
+
+	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
+
+	fmt.Println("\n<--------------- STATUS UPDATE --------------->")
+	fmt.Println()
+	log.Printf("Tracking Code: %s\n", in.GetTrackingCode())
+	log.Printf("STATUS INFORMATON: %s\n", in.GetStatus())
+
+	ordenesCompletas.PushBack(in.GetTrackingCode())
 
 	//Codigo de respuesta
 	var str string
@@ -289,6 +307,54 @@ func camiones() {
 	pb.RegisterGreeterServer(s, &server{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve s2: %v", err)
+	}
+}
+
+func enviarAfinanzas() {
+	// se crea conecxion
+	conn, err := amqp.Dial("amqp://test:test@10.6.40.169:5672/")
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	// se abre el canal
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	// creacion de cola
+	q, err := ch.QueueDeclare(
+		"hello-queue", // name
+		false,         // durable
+		false,         // delete when unused
+		false,         // exclusive
+		false,         // no-wait
+		nil,           // arguments
+	)
+	failOnError(err, "Failed to declare a queue")
+	var code string
+	for {
+		if ordenesCompletas.front() != nil {
+			code = ordenesCompletas.Front().Value
+			data = ProductDatabaseByTracking[code]
+			// envia info
+			//Creacion de msg a publicar
+			body := "{name:arvind, message:hello}"
+			err = ch.Publish(
+				"",     // exchange
+				q.Name, // routing key
+				false,  // mandatory
+				false,  // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(body),
+				})
+			log.Printf(" [x] Sent %s", body)
+			failOnError(err, "Failed to publish a message")
+
+			ordenesCompletas.Remove(code)
+		} else {
+			fmt.Print("No hay ordenes completadas")
+		}
 	}
 }
 

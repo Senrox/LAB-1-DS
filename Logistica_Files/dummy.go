@@ -1,4 +1,4 @@
-//sender
+//sender / publisher
 package main
 
 import (
@@ -16,14 +16,17 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
+	// se crea conecxion
 	conn, err := amqp.Dial("amqp://test:test@10.6.40.169:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
+	// se abre el canal
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
+	// creacion de cola
 	q, err := ch.QueueDeclare(
 		"hello-queue", // name
 		false,         // durable
@@ -33,6 +36,8 @@ func main() {
 		nil,           // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
+
+	//Creacion de msg a publicar
 	body := "{name:arvind, message:hello}"
 	err = ch.Publish(
 		"",     // exchange

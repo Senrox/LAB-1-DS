@@ -113,7 +113,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				}
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 				defer cancel()
-				received1, err := c.TrackingStatus(ctx, dat)
+				received1, err := c.TrackingStatusUpdate(ctx, dat)
 				if err != nil {
 					log.Fatalf("\ncould not greet with retail: %v%s", err, received1)
 				}
@@ -157,7 +157,7 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 				}
 				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 				defer cancel()
-				received1, err := c.TrackingStatus(ctx, dat)
+				received1, err := c.TrackingStatusUpdate(ctx, dat)
 				if err != nil {
 					log.Fatalf("\ncould not greet with pyme: %v%s", err, received1)
 				}
@@ -183,10 +183,17 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int) {
 		}
 		ctx, cancel = context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
-		m, err := c.TrackingStatus(ctx, orderUpdate)
+		m, err := c.TrackingStatusFinal(ctx, orderUpdate)
 		if err != nil {
 			log.Fatalf("\ncould not greet at the end: %v\n\tTrackingcode: %s\n\tStatus: %s%s\n", err, received.OrderID, newEstado, m)
 		}
+
+		// aca
+		//enviarAfinanzas
+		/*
+		camion -> logistica
+		logistica : enviarStatus(final)
+		*/
 	} else {
 		fmt.Println("\nxNo hay ordenes pendientes")
 	}

@@ -27,7 +27,8 @@ service Greeter {
   rpc SayHello (HelloRequest) returns (HelloReply) {}
   rpc MakeOrder (OrderRequest) returns (OrderConfirmation) {}
   rpc TrackingOrder (TrackingRequest) returns (Status) {}
-  rpc TrackingStatus (StatusResponse) returns (msgGenerico) {}
+  rpc TrackingStatusUpdate (StatusResponse) returns (msgGenerico) {}
+  rpc TrackingStatusFinal (StatusResponse) returns (HelloReply) {}
   rpc SendInformation (DeliveryRequest) returns (Information) {}
   rpc DeliverOrder (Information) returns (HelloReply) {}
 }
