@@ -260,7 +260,7 @@ func (s *server) TrackingStatusFinal(ctx context.Context, in *pb.StatusResponse)
 
 	//Codigo de respuesta
 	var str string
-	return &pb.MsgGenerico{Message: str}, nil
+	return &pb.HelloReply{Message: str}, nil
 }
 
 // ProductStatus status de los productos
