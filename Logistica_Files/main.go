@@ -310,6 +310,13 @@ func camiones() {
 	}
 }
 
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s: %s", msg, err)
+		panic(fmt.Sprintf("%s: %s", msg, err))
+	}
+}
+
 func enviarAfinanzas() {
 	// se crea conecxion
 	conn, err := amqp.Dial("amqp://test:test@10.6.40.169:5672/")
