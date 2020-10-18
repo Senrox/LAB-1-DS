@@ -7,9 +7,9 @@ ______________
 
 
 ## Integrantes:
+    - Campus San Joaquin
     - 201773617-8   Zhuo Chang
     - 201773557-0   Martín Salinas
-    - Campus San Joaquin
 ______________
 
 
