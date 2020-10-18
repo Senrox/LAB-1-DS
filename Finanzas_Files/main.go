@@ -53,17 +53,23 @@ func guardar() {
 }
 
 //SetupCloseHandler, se ocupa de mostrar todo cuando hay ctr+c
-func SetupCloseHandler(finDeSesion BalanceFinal) {
+func SetupCloseHandler() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
+		<-c
 		fmt.Println("\r- Ctrl+C pressed in Terminal")
 		fmt.Printf("\nBALANCE GENERAL:\n")
-		fmt.Printf("GANANCIAS: %f, PERDIDAS: %f, ENVIOS TOTALES: %d, ENVIOS NO ENTREGADOS: %d, ENVIOS ENTREGADOS: %d\n", finDeSesion.gananciasTotal, finDeSesion.perdidasTotal, finDeSesion.enviosTotales, finDeSesion.enviosNoEntregados, finDeSesion.enviosEntregados)
-		<-c
+		fmt.Printf("GANANCIAS: %f, PERDIDAS: %f, ENVIOS TOTALES: %d, ENVIOS NO ENTREGADOS: %d, ENVIOS ENTREGADOS: %d\n", gananciasTotal, perdidasTotal, enviosTotales, enviosNoEntregados, enviosEntregados)
 		os.Exit(0)
 	}()
 }
+
+var gananciasTotal = 0.0
+var perdidasTotal = 0.0
+var enviosEntregados = 0
+var enviosNoEntregados = 0
+var enviosTotales = 0
 
 func main() {
 	// Inicaimos conexion
@@ -121,14 +127,6 @@ func main() {
 		}
 	*/
 
-	var finDeSesion BalanceFinal
-
-	finDeSesion.gananciasTotal = 0.0
-	finDeSesion.perdidasTotal = 0.0
-	finDeSesion.enviosEntregados = 0
-	finDeSesion.enviosNoEntregados = 0
-	finDeSesion.enviosTotales = 0
-
 	go func() {
 		for d := range msgs {
 			//log.Printf("Received a message: %s", d.Body)
@@ -165,7 +163,7 @@ func main() {
 				balance.total = total
 				balance.ganancia = valorProducto
 				balance.perdida = perdidas
-				finDeSesion.enviosEntregados = finDeSesion.enviosEntregados + 1
+				enviosEntregados = enviosEntregados + 1
 			} else {
 				//No Recibido
 				if reading.Order_type == "Normal" {
@@ -186,16 +184,17 @@ func main() {
 					balance.ganancia = valorProducto
 					balance.perdida = valorProducto
 				}
-				finDeSesion.enviosNoEntregados = finDeSesion.enviosNoEntregados + 1
+				enviosNoEntregados = enviosNoEntregados + 1
 			}
-			finDeSesion.gananciasTotal = finDeSesion.gananciasTotal + balance.ganancia
-			finDeSesion.perdidasTotal = finDeSesion.perdidasTotal + balance.perdida
+			gananciasTotal = gananciasTotal + balance.ganancia
+			perdidasTotal = perdidasTotal + balance.perdida
 			fmt.Println(balance)
+			fmt.Println(gananciasTotal)
 			// Guardar Registro PAPOPE
-			finDeSesion.enviosTotales = finDeSesion.enviosTotales + 1
+			enviosTotales = enviosTotales + 1
 		}
 	}()
-	SetupCloseHandler(finDeSesion)
+	SetupCloseHandler()
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
