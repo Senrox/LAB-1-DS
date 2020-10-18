@@ -33,6 +33,14 @@ type Balance struct {
 	perdida  float64
 }
 
+type BalanceFinal struct {
+	gananciasTotal     float64
+	perdidasTotal      float64
+	enviosEntregados   int
+	enviosNoEntregados int
+	enviosTotales      int
+}
+
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -56,12 +64,6 @@ func SetupCloseHandler(gananciasTotal float64, perdidasTotal float64, enviosTota
 		os.Exit(0)
 	}()
 }
-
-var gananciasTotal float64 = 0.0
-var perdidasTotal float64 = 0.0
-var enviosEntregados int = 0
-var enviosNoEntregados int = 0
-var enviosTotales int = 0
 
 func main() {
 	// Inicaimos conexion
@@ -109,7 +111,23 @@ func main() {
 		Status      string `json:"status"`
 		Atts        string `json:"atts"`
 		}
+
+		type BalanceFinal struct {
+		gananciasTotal     float64
+		perdidasTotal      float64
+		enviosEntregados   int
+		enviosNoEntregados int
+		enviosTotales      int
+		}
 	*/
+
+	var finDeSesion BalanceFinal
+
+	finDeSesion.gananciasTotal = 0.0
+	finDeSesion.perdidasTotal = 0.0
+	finDeSesion.enviosEntregados = 0
+	finDeSesion.enviosNoEntregados = 0
+	finDeSesion.enviosTotales = 0
 
 	go func() {
 		for d := range msgs {
@@ -147,7 +165,7 @@ func main() {
 				balance.total = total
 				balance.ganancia = valorProducto
 				balance.perdida = perdidas
-				enviosEntregados++
+				finDeSesion.enviosEntregados = finDeSesion.enviosEntregados + 1
 			} else {
 				//No Recibido
 				if reading.Order_type == "Normal" {
@@ -168,13 +186,13 @@ func main() {
 					balance.ganancia = valorProducto
 					balance.perdida = valorProducto
 				}
-				enviosNoEntregados++
+				finDeSesion.enviosNoEntregados = finDeSesion.enviosNoEntregados + 1
 			}
-			gananciasTotal = gananciasTotal + balance.ganancia
-			perdidasTotal = perdidasTotal + balance.perdida
+			finDeSesion.gananciasTotal = finDeSesion.gananciasTotal + balance.ganancia
+			finDeSesion.perdidasTotal = finDeSesion.perdidasTotal + balance.perdida
 			fmt.Println(balance)
 			// Guardar Registro PAPOPE
-			enviosTotales++
+			finDeSesion.enviosTotales = finDeSesion.enviosTotales + 1
 		}
 	}()
 
