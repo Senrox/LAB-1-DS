@@ -53,14 +53,14 @@ func guardar() {
 }
 
 //SetupCloseHandler, se ocupa de mostrar todo cuando hay ctr+c
-func SetupCloseHandler(gananciasTotal float64, perdidasTotal float64, enviosTotales int, enviosNoEntregados int, enviosEntregados int) {
+func SetupCloseHandler(finDeSesion BalanceFinal) {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		fmt.Println("\r- Ctrl+C pressed in Terminal")
 		fmt.Printf("\nBALANCE GENERAL:\n")
-		fmt.Printf("GANANCIAS: %f, PERDIDAS: %f, ENVIOS TOTALES: %d, ENVIOS NO ENTREGADOS: %d, ENVIOS ENTREGADOS: %d\n", gananciasTotal, perdidasTotal, enviosTotales, enviosNoEntregados, enviosEntregados)
+		fmt.Printf("GANANCIAS: %f, PERDIDAS: %f, ENVIOS TOTALES: %d, ENVIOS NO ENTREGADOS: %d, ENVIOS ENTREGADOS: %d\n", finDeSesion.gananciasTotal, finDeSesion.perdidasTotal, finDeSesion.enviosTotales, finDeSesion.enviosNoEntregados, finDeSesion.enviosEntregados)
 		os.Exit(0)
 	}()
 }
@@ -198,5 +198,5 @@ func main() {
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
-	SetupCloseHandler(gananciasTotal, perdidasTotal, enviosTotales, enviosNoEntregados, enviosEntregados)
+	SetupCloseHandler(finDeSesion)
 }
