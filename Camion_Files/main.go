@@ -220,28 +220,14 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int, f *os.File)
 
 }
 
-func camion(c pb.GreeterClient, n int, tipo string, intentoTime int, pedidoTime int) {
-	str := fmt.Sprintf("registry_truck_%s_%d.csv", tipo, n)
-
-	f, err := os.Open(str)
-	check(err)
-	toFile := "OrderID,ProductValue,Origen,Destino,Intentos,hora\n"
-	_, err2 := f.WriteString(toFile)
-	check(err2)
+func camion(c pb.GreeterClient, tipo string, intentoTime int, pedidoTime int, f *os.File) {
 
 	realizarEnvio(c, tipo, intentoTime, f)
 
-	defer f.Close()
-
 	// tiempo de espera despues de un envio
-
 	time.Sleep(time.Duration(pedidoTime) * time.Second)
 
-	f2, err3 := os.Open(str)
-	check(err3)
-
-	realizarEnvio(c, tipo, intentoTime, f2)
-	defer f2.Close()
+	realizarEnvio(c, tipo, intentoTime, f)
 
 }
 
@@ -286,14 +272,32 @@ func main() {
 
 	// Contact the server and print out its response.
 
+	// open csvs
+	f, err := os.Open("registry_truck_retail_1.csv")
+	check(err)
+	f1, err1 := os.Open("registry_truck_retail_2.csv")
+	check(err1)
+	f2, err2 := os.Open("registry_truck_pyme_1.csv")
+	check(err2)
+
+	toFile := "OrderID,ProductValue,Origen,Destino,Intentos,hora\n"
+	_, e := f.WriteString(toFile)
+	check(e)
+	_, e1 := f.WriteString(toFile)
+	check(e1)
+	_, e2 := f.WriteString(toFile)
+	check(e2)
+
 	for {
-		go camion(c, 1, "retail", intentoTime, pedidoTime)
+		go camion(c, "retail", intentoTime, pedidoTime, f)
 		time.Sleep(3 * time.Second)
 
-		go camion(c, 2, "retail", intentoTime, pedidoTime)
+		go camion(c, "retail", intentoTime, pedidoTime, f1)
 		time.Sleep(3 * time.Second)
 
-		camion(c, 1, "pyme", intentoTime, pedidoTime)
+		camion(c, "pyme", intentoTime, pedidoTime, f2)
 		time.Sleep(3 * time.Second)
 	}
+
+	defer f.Close()
 }
