@@ -273,11 +273,11 @@ func main() {
 	// Contact the server and print out its response.
 
 	// open csvs
-	f, er := os.Open("registry_truck_retail_1.csv")
+	f, er := os.Create("registry_truck_retail_1.csv")
 	check(er)
-	f1, err1 := os.Open("registry_truck_retail_2.csv")
+	f1, err1 := os.Create("registry_truck_retail_2.csv")
 	check(err1)
-	f2, err2 := os.Open("registry_truck_pyme_1.csv")
+	f2, err2 := os.Create("registry_truck_pyme_1.csv")
 	check(err2)
 
 	toFile := "OrderID,ProductValue,Origen,Destino,Intentos,hora\n"
@@ -290,13 +290,13 @@ func main() {
 
 	for {
 		go camion(c, "retail", intentoTime, pedidoTime, f)
-		time.Sleep(3 * time.Second)
+		time.Sleep((intentoTime + pedidoTime) * time.Second)
 
 		go camion(c, "retail", intentoTime, pedidoTime, f1)
-		time.Sleep(3 * time.Second)
+		time.Sleep((intentoTime + pedidoTime) * time.Second)
 
 		camion(c, "pyme", intentoTime, pedidoTime, f2)
-		time.Sleep(3 * time.Second)
+		time.Sleep((intentoTime + pedidoTime) * time.Second)
 	}
 
 	defer f.Close()
