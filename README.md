@@ -41,7 +41,9 @@ ______________
     protoc -I="." --go_out=$GOROOT/src/helloworld --go-grpc_out=$GOROOT/src/helloworld helloworld.proto
 
 #### Maquina 1:
-    - Primero se deben ejecutar los comandos de rabbitmq en la consola: /sbin/service rabbitmq-server start 
+    - Primero se deben ejecutar los comandos de rabbitmq en la consola: 
+            /sbin/service rabbitmq-server start
+        para detenerlo, cambiar start por stop
     - luego se debe entrar a la carpeta Logistica_Files
     - Para inicizalizar el servicio de logistica, se debe ejecutar el comando make
     - Para actualizar el repositorio se debe correr el comando make update
@@ -58,7 +60,9 @@ ______________
     - Para actualizar el repositorio se debe correr el comando make update
 
 #### Maquina 4:
-    - Primero se deben ejecutar los comandos de rabbitmq en la consola: /sbin/service rabbitmq-server start
+    - Primero se deben ejecutar los comandos de rabbitmq en la consola: 
+            /sbin/service rabbitmq-server start
+        para detenerlo, cambiar start por stop
     - Para inicizalizar el servicio de finanzas, se debe ejecutar el comando make
     - Para actualizar el repositorio se debe correr el comando make update
 ______________
