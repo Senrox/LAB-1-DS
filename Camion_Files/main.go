@@ -290,13 +290,13 @@ func main() {
 
 	for {
 		go camion(c, "retail", intentoTime, pedidoTime, f)
-		time.Sleep((intentoTime + pedidoTime) * time.Second)
+		time.Sleep(time.Duration(intentoTime+pedidoTime) * time.Second)
 
 		go camion(c, "retail", intentoTime, pedidoTime, f1)
-		time.Sleep((intentoTime + pedidoTime) * time.Second)
+		time.Sleep(time.Duration(intentoTime+pedidoTime) * time.Second)
 
 		camion(c, "pyme", intentoTime, pedidoTime, f2)
-		time.Sleep((intentoTime + pedidoTime) * time.Second)
+		time.Sleep(time.Duration(intentoTime+pedidoTime) * time.Second)
 	}
 
 	defer f.Close()
