@@ -189,7 +189,6 @@ func main() {
 			gananciasTotal = gananciasTotal + balance.ganancia
 			perdidasTotal = perdidasTotal + balance.perdida
 			fmt.Println(balance)
-			fmt.Println(gananciasTotal)
 			// Guardar Registro PAPOPE
 			enviosTotales = enviosTotales + 1
 		}
