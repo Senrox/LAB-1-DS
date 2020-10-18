@@ -79,6 +79,7 @@ func pymeOrders() *list.List {
 		}
 
 	}
+	defer fp.Close()
 	return itemsPyme
 }
 
@@ -111,6 +112,7 @@ func retailOrders() *list.List {
 		}
 
 	}
+	defer fp.Close()
 	return itemsRetail
 }
 
@@ -219,8 +221,10 @@ func main() {
 	//Thread hacer ordenes
 	//soy Pyme
 	if opcion == "1" {
+		fmt.Println("soy Pyme")
 		go hacerOrden(pymes, c, waitingTime)
 	} else { //Soy Retail
+		fmt.Println("soy Retail")
 		go hacerOrden(retails, c, waitingTime)
 	}
 

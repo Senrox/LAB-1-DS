@@ -179,6 +179,6 @@ func main() {
 	}()
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	SetupCloseHandler(gananciasTotal, perdidasTotal, enviosTotales, enviosNoEntregados, enviosEntregados)
 	<-forever
+	SetupCloseHandler(gananciasTotal, perdidasTotal, enviosTotales, enviosNoEntregados, enviosEntregados)
 }
