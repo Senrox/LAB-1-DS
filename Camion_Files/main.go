@@ -273,8 +273,8 @@ func main() {
 	// Contact the server and print out its response.
 
 	// open csvs
-	f, err := os.Open("registry_truck_retail_1.csv")
-	check(err)
+	f, er := os.Open("registry_truck_retail_1.csv")
+	check(er)
 	f1, err1 := os.Open("registry_truck_retail_2.csv")
 	check(err1)
 	f2, err2 := os.Open("registry_truck_pyme_1.csv")
@@ -283,9 +283,9 @@ func main() {
 	toFile := "OrderID,ProductValue,Origen,Destino,Intentos,hora\n"
 	_, e := f.WriteString(toFile)
 	check(e)
-	_, e1 := f.WriteString(toFile)
+	_, e1 := f1.WriteString(toFile)
 	check(e1)
-	_, e2 := f.WriteString(toFile)
+	_, e2 := f2.WriteString(toFile)
 	check(e2)
 
 	for {
@@ -300,4 +300,6 @@ func main() {
 	}
 
 	defer f.Close()
+	defer f1.Close()
+	defer f2.Close()
 }
