@@ -14,6 +14,8 @@ import (
 	"github.com/streadway/amqp"
 )
 
+// Items2
+// Struct para formatear el struct item y leer como json
 type Items2 struct {
 	Id          string `json:"id"`
 	Order_type  string `json:"order_type"`
@@ -23,6 +25,7 @@ type Items2 struct {
 	Atts        string `json:"atts"`
 }
 
+//struct Balance, struct que guarda los datos a escribir  de una orden
 type Balance struct {
 	Id       string
 	Tracking string
@@ -33,14 +36,12 @@ type Balance struct {
 	perdida  float64
 }
 
-type BalanceFinal struct {
-	gananciasTotal     float64
-	perdidasTotal      float64
-	enviosEntregados   int
-	enviosNoEntregados int
-	enviosTotales      int
-}
-
+/*
+	failOnError()
+	comprueba un mensaje de error y lo muestra
+	Input: error, string
+	returns: nada
+*/
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -48,11 +49,12 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func guardar() {
-	fmt.Print("xd")
-}
-
-//SetupCloseHandler, se ocupa de mostrar todo cuando hay ctr+c
+/*
+	SetupCloseHandler()
+	se ocupa de mostrar todo cuando hay ctr+c
+	Input: nada
+	returns: nada
+*/
 func SetupCloseHandler() {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -107,25 +109,6 @@ func main() {
 
 	//bloquea la ejecucion del main.go hasta que recibe un valor
 	forever := make(chan bool)
-
-	/*
-		type Items2 struct {
-		Id          string `json:"id"`
-		Order_type  string `json:"order_type"`
-		Order_value string `json:"order_value"`
-		Tracking    string `json:"tracking"`
-		Status      string `json:"status"`
-		Atts        string `json:"atts"`
-		}
-
-		type BalanceFinal struct {
-		gananciasTotal     float64
-		perdidasTotal      float64
-		enviosEntregados   int
-		enviosNoEntregados int
-		enviosTotales      int
-		}
-	*/
 
 	go func() {
 		for d := range msgs {

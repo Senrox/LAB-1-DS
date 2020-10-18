@@ -51,7 +51,12 @@ type Items struct {
 	atts  string
 }
 
-// Envio retorna si el envio se hace o no se hace
+/*
+	Envio()
+	funcion para hacer un envio con probabilidad de succes de 0.8
+	Input: nada
+	returns: bool, estado de envio
+*/
 func Envio() bool {
 	in := []int{0, 1, 1, 1, 1}
 	randomIndex := rand.Intn(len(in))
@@ -63,7 +68,12 @@ func Envio() bool {
 	return false
 }
 
-//funcion que retorna el tiempo actual
+/*
+	getTime()
+	Obtiene el tiempo de la maquina
+	Input: no tiene
+	returns: fecha actual, string
+*/
 func getTime() string {
 	t := time.Now()
 	return fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d",
@@ -71,6 +81,12 @@ func getTime() string {
 		t.Hour(), t.Minute(), t.Second())
 }
 
+/*
+	realizarEnvio()
+	dado una orden se realiza el envio, haciendo registro de este
+	Input: pb.GreeterClient c, string tipo, int intentoTime, *os.File f
+	returns: nada
+*/
 func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int, f *os.File) {
 
 	// esto dentro del codigo de camiones
@@ -220,6 +236,12 @@ func realizarEnvio(c pb.GreeterClient, tipo string, intentoTime int, f *os.File)
 
 }
 
+/*
+	camion()
+	helper que usa la coneccion con logistica y hace envios de paquetes en base a intervalos de tiempo (pedidoTime e intentoTime), ademas lleva el registro de entregas en un archivo csv
+	Input: conexion c, string tipo, int intento time, int pedidoTime, archivo f
+	returns: nada
+*/
 func camion(c pb.GreeterClient, tipo string, intentoTime int, pedidoTime int, f *os.File) {
 
 	realizarEnvio(c, tipo, intentoTime, f)
@@ -231,7 +253,12 @@ func camion(c pb.GreeterClient, tipo string, intentoTime int, pedidoTime int, f 
 
 }
 
-//gets input from user
+/*
+	getInput()
+	pide input de un usuario segun corresponda la situacion y retorna la eleccion
+	Input: int x
+	returns: string input, eleccion
+*/
 func getInput(x int) string {
 	if x == 1 {
 		fmt.Print("\nIngrese ID producto a ordenar: ")
@@ -245,6 +272,12 @@ func getInput(x int) string {
 	return input
 }
 
+/*
+	check()
+	comprueba un error y lo muestra
+	Input: error e
+	returns: nada
+*/
 func check(e error) {
 	if e != nil {
 		panic(e)

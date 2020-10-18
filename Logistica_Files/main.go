@@ -1,21 +1,3 @@
-/*
- *
- * Copyright 2015 gRPC authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 // Package main implements a server for Greeter service.
 package main
 
@@ -37,6 +19,7 @@ import (
 	//pb "google.golang.org/grpc/examples/helloworld/helloworld"
 )
 
+// constantes de los puertos
 const (
 	portClientes = ":50051"
 	portCamiones = ":50052"
@@ -48,6 +31,7 @@ type server struct {
 	pb.UnimplementedGreeterServer
 }
 
+// Items
 // Contiene info de un producto
 type Items struct {
 	id          string
@@ -62,6 +46,8 @@ type Items struct {
 	atts        string
 }
 
+// Items2
+// Struct para formatear el struct item y enviarlo como json
 type Items2 struct {
 	Id          string `json:"id"`
 	Order_type  string `json:"order_type"`
@@ -71,20 +57,34 @@ type Items2 struct {
 	Atts        string `json:"atts"`
 }
 
+// ItemStatus
+// struct para guardar paquetes segun su codigo de envio
 type ItemStatus struct {
 	trackingCode string
 	status       string
 }
 
-// ProductDatabaseByTracking - base de datos de tracking
+// ProductDatabaseByTracking - base de datos de tracking y datos de cada paquete
 var ProductDatabaseByTracking map[string]*Items
 
+//Colas a utilizar
 var ordenesCompletas = list.New()
 var colaPrioritario = list.New()
 var colaNormal = list.New()
 var colaRetail = list.New()
 
-//funcion que retorna el tiempo actual
+// variable para generar codigos de seguimiento
+var trackingCode int = 1000
+
+// ProductStatus status de los productos
+var ProductStatus map[string]*ItemStatus
+
+/*
+	getTime()
+	Obtiene el tiempo de la maquina
+	Input: no tiene
+	returns: fecha actual, string
+*/
 func getTime() string {
 	t := time.Now()
 	return fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d",
@@ -92,15 +92,23 @@ func getTime() string {
 		t.Hour(), t.Minute(), t.Second())
 }
 
-// SayHello implements helloworld.GreeterServer
+/*
+	Sayhello()
+	recibe un mensaje de saludo y envia una respuesta
+	Input: context, mensaje tipo helloRequest
+	returns: mensaje tipo helloreply
+*/
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	log.Printf("Received: %v. From: %v", in.GetName(), in.GetClientName())
 	return &pb.HelloReply{Message: "Sup " + in.GetName()}, nil
 }
 
-var trackingCode int = 1000
-
-// Server recibe orden y se evnia codigo de seguimiento
+/*
+	MakeOrder()
+	recibe una order y la procesa retornando la orden
+	Input: context, mensaje tipo OrderRequest
+	returns: mensaje tipo orderConfirmation
+*/
 func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderConfirmation, error) {
 
 	fmt.Println("\n<--------------- NEW ORDER COMES IN!!! --------------->")
@@ -131,6 +139,10 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 		timestamp:   getTime(),
 	}
 
+	if orden.order_type == "Retail" {
+		orden.tracking = "0"
+	}
+
 	store(orden)
 	//generar codigo para enviar a las colas
 
@@ -140,8 +152,12 @@ func (s *server) MakeOrder(ctx context.Context, in *pb.OrderRequest) (*pb.OrderC
 	return &pb.OrderConfirmation{Message: strTrackingCode}, nil
 }
 
-//consulta de seguimiento a camiones
-
+/*
+	SendInformation()
+	recibe un delivery request de un camion y retorna la informacion de un envio segun corresponda
+	Input: context, mensaje tipo deliveryRequest
+	returns: mensaje de tipo Information
+*/
 func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*pb.Information, error) {
 
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
@@ -150,14 +166,6 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	fmt.Printf("\n\tTipo Camion: %s\n", tipoCamion)
 	fmt.Println("\n<--------------- INFORMATION STATUS --------------->")
 
-	/*
-		front := l.Front()
-		itemI := Items(front.Value.(Items))
-
-		do stuff
-
-		l.Remove(front)
-	*/
 	var itemI Items
 	var itemII Items
 	var flag = true
@@ -203,18 +211,6 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 		}
 	}
 
-	/*Items
-	type Items struct {
-		id          string
-		name        string
-		order_type  string
-		order_dest  string
-		order_src   string
-		order_value string
-		tracking    string
-		status      string
-		timestamp   string
-	}*/
 	if flag {
 		return &pb.Information{
 			OrderID:      itemII.tracking,
@@ -238,8 +234,12 @@ func (s *server) SendInformation(ctx context.Context, in *pb.DeliveryRequest) (*
 	}, nil
 }
 
-// respuesta a consulta de seguimiento
-// cliente <-> servidor
+/*
+	TrackingOrder()
+	recibe un tracking request de un cliente y retorna la informacion del paquete segun corresponda
+	Input: context, mensaje tipo trackingRequest
+	returns: mensaje de tipo status
+*/
 func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb.Status, error) {
 
 	fmt.Println("\n<--------------- STATUS REQUEST --------------->")
@@ -250,8 +250,12 @@ func (s *server) TrackingOrder(ctx context.Context, in *pb.TrackingRequest) (*pb
 	return &pb.Status{Message: ProductDatabaseByTracking[in.GetTrackingCode()].status}, nil
 }
 
-// actualizacion de estados
-// camoines <-> servidor
+/*
+	TrackingStatusUpdate()
+	recibe una actualizacion de un paquete por parte de un camion y hace el update correspondiente
+	Input: context, mensaje tipo statusResponse
+	returns: mensaje generico sin importancia
+*/
 func (s *server) TrackingStatusUpdate(ctx context.Context, in *pb.StatusResponse) (*pb.MsgGenerico, error) {
 
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
@@ -267,6 +271,12 @@ func (s *server) TrackingStatusUpdate(ctx context.Context, in *pb.StatusResponse
 	return &pb.MsgGenerico{Message: str}, nil
 }
 
+/*
+	TrackingStatusFinal()
+	recibe una actualizacion de un paquete por parte de un camion y hace el update correspondiente para el estado final del paquete
+	Input: context, mensaje tipo statusResponse
+	returns: mensaje de tipo helloReply
+*/
 func (s *server) TrackingStatusFinal(ctx context.Context, in *pb.StatusResponse) (*pb.HelloReply, error) {
 
 	ProductDatabaseByTracking[in.GetTrackingCode()].status = in.GetStatus()
@@ -284,15 +294,22 @@ func (s *server) TrackingStatusFinal(ctx context.Context, in *pb.StatusResponse)
 	return &pb.HelloReply{Message: str}, nil
 }
 
-// ProductStatus status de los productos
-var ProductStatus map[string]*ItemStatus
-
-//funcion que almacena datos en un hashmap
+/*
+	Store()
+	recibe un struct item y lo guarda en el map segun su codigo de seguimiento
+	Input: struct de tipo items
+	returns: nada
+*/
 func store(item Items) {
 	ProductDatabaseByTracking[item.tracking] = &item
 }
 
-//funcion que almacena datos en un hashmap
+/*
+	StoreInList()
+	recibe un struct item y lo guarda en la cola de camion que le corresponda
+	Input: struct de tipo items
+	returns: nada
+*/
 func storeInList(item Items) {
 	if item.order_type == "0" {
 		colaNormal.PushBack(item)
@@ -303,6 +320,12 @@ func storeInList(item Items) {
 	}
 }
 
+/*
+	Clientes()
+	Conexion con clientes
+	Input: nada
+	returns: nada
+*/
 func clientes() {
 	//--------------------------------------------------------------> Server1
 	fmt.Print("Waitin for my Clientes...")
@@ -317,6 +340,12 @@ func clientes() {
 	}
 }
 
+/*
+	camiones()
+	Conexion con Camiones
+	Input: nada
+	returns: nada
+*/
 func camiones() {
 	//--------------------------------------------------------------> Server1
 	fmt.Print("Waitin for Trucks...")
@@ -331,6 +360,12 @@ func camiones() {
 	}
 }
 
+/*
+	failOnError()
+	comprueba un mensaje de error y lo muestra
+	Input: error, string
+	returns: nada
+*/
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -338,6 +373,12 @@ func failOnError(err error, msg string) {
 	}
 }
 
+/*
+	enviarAfinanzas()
+	Se conecta con finanzas y hace el publish de structs items2 con rabbitmq, ademas hace el registro de paquetes
+	Input: f *os.File, archivo a actualizar
+	returns: nada
+*/
 func enviarAfinanzas(f *os.File) {
 	// se crea conecxion
 	conn, err := amqp.Dial("amqp://test:test@10.6.40.169:5672/")
@@ -367,20 +408,6 @@ func enviarAfinanzas(f *os.File) {
 			code = string(front.Value.(string))
 
 			item := ProductDatabaseByTracking[code]
-			/*
-				type Items struct {
-					id          string
-					name        string
-					order_type  string
-					order_dest  string
-					order_src   string
-					order_value string
-					tracking    string
-					status      string
-					timestamp   string
-					atts 		string intentos
-				}
-			*/
 
 			item2 := Items2{Id: item.id, Order_type: item.order_type, Order_value: item.order_value, Tracking: item.tracking, Status: item.status, Atts: item.atts}
 
@@ -389,7 +416,6 @@ func enviarAfinanzas(f *os.File) {
 				fmt.Println(err)
 			}
 
-			//body := fmt.Sprintf("{id:%s,value:%s,status:%s,orderId:%s,attempts:%s}", item.id, item.order_value, item.status, item.tracking, item.atts)
 			// envia info
 			//Creacion de msg a publicar
 			err = ch.Publish(
@@ -422,6 +448,12 @@ func enviarAfinanzas(f *os.File) {
 	}
 }
 
+/*
+	check()
+	comprueba un error y lo muestra
+	Input: error e
+	returns: nada
+*/
 func check(e error) {
 	if e != nil {
 		panic(e)
