@@ -47,6 +47,7 @@ ______________
     - luego se debe entrar a la carpeta Logistica_Files
     - Para inicizalizar el servicio de logistica, se debe ejecutar el comando make
     - Para actualizar el repositorio se debe correr el comando make update
+    - El comando make clean elimina los archivos csv de esta carpeta
 
 #### Maquina 2:
     - Para inicizalizar el servicio de Camiones, se debe ejecutar el comando make
@@ -58,6 +59,7 @@ ______________
     - Una vez inicializado el servicio, se debe ingresar el tiempo entre ordenes
     - Despues de haber ingresado el tiempo entre ordenes, se debe seleccionar el tipo de cliente
     - Para actualizar el repositorio se debe correr el comando make update
+    - El comando make clean elimina los archivos csv de esta carpeta
 
 #### Maquina 4:
     - Primero se deben ejecutar los comandos de rabbitmq en la consola: 
@@ -69,6 +71,8 @@ ______________
 
 
 ## Consideraciones:
+    - Se asume que los archivos csv que contienen las ordenes se llaman pymes.csv y retail.csv
+        Ambos estan ubicados dentro de la maquina de clientes en la carpeta LAB-1-DS/Cliente_Files/csv_files
     - Se tomo cada envio del paquete como un intento, por lo tanto el primer intento tiene un costo de 0 y los posteriores tienen un costo de 10.
     - Se asume que el usuario sabe lo que tiene que hacer y no comete errores en sus inputs
     - Se asume que existe una carpeta llamada helloworld dentro de $GOROOT/src
