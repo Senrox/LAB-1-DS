@@ -50,11 +50,13 @@ ______________
     - El comando make clean elimina los archivos csv de esta carpeta
 
 #### Maquina 2:
+    - Primero se debe entrar a la carpeta Camion_Files
     - Para inicizalizar el servicio de Camiones, se debe ejecutar el comando make
     - Una vez inicializado el servicio, se deben ingresar los tiempos entre cada intento de envio y cada orden del camion
     - Para actualizar el repositorio se debe correr el comando make update
 
 #### Maquina 3:
+    - Primero se debe entrar a la carpeta Clientes_Files
     - Para inicizalizar el servicio de Clientes, se debe ejecutar el comando make
     - Una vez inicializado el servicio, se debe ingresar el tiempo entre ordenes
     - Despues de haber ingresado el tiempo entre ordenes, se debe seleccionar el tipo de cliente
@@ -62,6 +64,7 @@ ______________
     - El comando make clean elimina los archivos csv de esta carpeta
 
 #### Maquina 4:
+    - Primero se debe entrar a la carpeta Finanzas_Files
     - Primero se deben ejecutar los comandos de rabbitmq en la consola: 
             /sbin/service rabbitmq-server start
         para detenerlo, cambiar start por stop
