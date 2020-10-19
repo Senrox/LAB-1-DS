@@ -64,10 +64,10 @@ ______________
     - El comando make clean elimina los archivos csv de esta carpeta
 
 #### Maquina 4:
-    - Primero se debe entrar a la carpeta Finanzas_Files
     - Primero se deben ejecutar los comandos de rabbitmq en la consola: 
             /sbin/service rabbitmq-server start
         para detenerlo, cambiar start por stop
+    - Segundo se debe entrar a la carpeta Finanzas_Files
     - Para inicizalizar el servicio de finanzas, se debe ejecutar el comando make
     - Para actualizar el repositorio se debe correr el comando make update
 ______________
